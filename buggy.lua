@@ -16,25 +16,47 @@ local function Make(className, properties, children)
     return inst
 end
 
-local ExHub = {}
-ExHub.ThemePalettes = {
+local Quantum = {}
+Quantum.ThemePalettes = {
     ["Default Hitam"] = {
-    Accent = Color3.fromRGB(255, 255, 255),
-    Grad1 = Color3.fromRGB(0, 0, 0),
-    Grad2 = Color3.fromRGB(255, 255, 255)},
-    ["Sunset Orange"] = {Accent = Color3.fromRGB(255, 120, 0), Grad1 = Color3.fromRGB(30, 10, 0), Grad2 = Color3.fromRGB(120, 40, 0)},
-    ["Matrix Green"] = {Accent = Color3.fromRGB(0, 255, 100), Grad1 = Color3.fromRGB(0, 15, 5), Grad2 = Color3.fromRGB(0, 70, 20)},
-    ["Blood Red"] = {Accent = Color3.fromRGB(255, 50, 50), Grad1 = Color3.fromRGB(20, 5, 5), Grad2 = Color3.fromRGB(90, 0, 0)}
+        Accent = Color3.fromRGB(255, 255, 255),
+        Grad1 = Color3.fromRGB(0, 0, 0),
+        Grad2 = Color3.fromRGB(255, 255, 255)
+    },
+
+    ["Sunset Orange"] = {
+        Accent = Color3.fromRGB(255, 120, 0),
+        Grad1 = Color3.fromRGB(30, 10, 0),
+        Grad2 = Color3.fromRGB(120, 40, 0)
+    },
+
+    ["Matrix Green"] = {
+        Accent = Color3.fromRGB(0, 255, 100),
+        Grad1 = Color3.fromRGB(0, 15, 5),
+        Grad2 = Color3.fromRGB(0, 70, 20)
+    },
+
+    ["Blood Red"] = {
+        Accent = Color3.fromRGB(255, 50, 50),
+        Grad1 = Color3.fromRGB(20, 5, 5),
+        Grad2 = Color3.fromRGB(90, 0, 0)
+    },
+
+    ["Neon Green"] = {
+        Accent = Color3.fromRGB(57, 255, 20),
+        Grad1 = Color3.fromRGB(0, 25, 0),
+        Grad2 = Color3.fromRGB(0, 100, 0)
+    }
 }
 
-function ExHub.Build(Config)
-    local Window = { Tabs = {}, CurrentTheme = Config.Theme or "Default Hitam" }
-    local Theme = ExHub.ThemePalettes[Window.CurrentTheme]
+function Quantum.Build(Config)
+    local Window = { Tabs = {}, CurrentTheme = Config.Theme or "Neon Green" }
+    local Theme = Quantum.ThemePalettes[Window.CurrentTheme]
 
-    local OldGui = Services.CoreGui:FindFirstChild("ExHubXOpenSource")
+    local OldGui = Services.CoreGui:FindFirstChild("QuantumXOpenSource")
     if OldGui then OldGui:Destroy() end
 
-    Window.ScreenGui = Make("ScreenGui", {Name = "ExHubXOpenSource", Parent = Services.CoreGui, ResetOnSpawn = false})
+    Window.ScreenGui = Make("ScreenGui", {Name = "QuantumXOpenSource", Parent = Services.CoreGui, ResetOnSpawn = false})
     Window.NotifContainer = Make("Frame", {Parent = Window.ScreenGui, Size = UDim2.new(0, 300, 1, -20), Position = UDim2.new(1, -10, 0, 0), AnchorPoint = Vector2.new(1, 0), BackgroundTransparency = 1}, { Make("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Bottom, HorizontalAlignment = Enum.HorizontalAlignment.Right, Padding = UDim.new(0, 8)}) })
     
     Window.MainFrame = Make("CanvasGroup", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(255, 255, 255), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, 0), Size = UDim2.new(0, 400, 0, 260), Visible = false, GroupTransparency = 1, Active = true, Draggable = true}, {
@@ -42,7 +64,7 @@ function ExHub.Build(Config)
         Make("UIGradient", {Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Theme.Grad1), ColorSequenceKeypoint.new(1.00, Theme.Grad2)}, Rotation = 45})
     })
 
-    Window.ToggleBtn = Make("ImageButton", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(12, 12, 18), AnchorPoint = Vector2.new(0,0.5), Position = UDim2.new(0, 20, 0.5, 0), Size = UDim2.new(0, 40, 0, 40), Image = Config.ToggleIcon or "rbxassetid://83464452162727", Visible = false, Draggable = true}, { Make("UICorner", {CornerRadius = UDim.new(0, 12)}), Make("UIStroke", {Color = Theme.Accent}) })
+    Window.ToggleBtn = Make("ImageButton", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(12, 12, 18), AnchorPoint = Vector2.new(0,0.5), Position = UDim2.new(0, 20, 0.5, 0), Size = UDim2.new(0, 40, 0, 40), Image = Config.ToggleIcon or "rbxassetid://131775361395370", Visible = false, Draggable = true}, { Make("UICorner", {CornerRadius = UDim.new(0, 12)}), Make("UIStroke", {Color = Theme.Accent}) })
     
     local InnerFrame = Make("Frame", {Parent = Window.MainFrame, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ClipsDescendants = true}, { Make("UICorner", {CornerRadius = UDim.new(0, 10)}) })
     Make("TextLabel", {Parent = InnerFrame, Text = Config.Title .. " | " .. Config.Subtitle, TextColor3 = Theme.Accent, Font = Enum.Font.GothamBlack, TextSize = 11, Position = UDim2.new(0, 15, 0, 10), Size = UDim2.new(0, 200, 0, 15), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
@@ -103,14 +125,14 @@ local MinBtn = Make("TextButton", {
         local NFrame = Make("Frame", {Parent = self.NotifContainer, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY, ClipsDescendants = true, Position = UDim2.new(1, 50, 0, 0)}, {
             Make("UICorner", {CornerRadius = UDim.new(0, 6)}), Make("UIPadding", {PaddingTop = UDim.new(0, 8), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10)}), Make("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8)})
         })
-        local NStroke = Make("UIStroke", {Parent = NFrame, Color = ExHub.ThemePalettes[self.CurrentTheme].Accent, Transparency = 1})
+        local NStroke = Make("UIStroke", {Parent = NFrame, Color = Quantum.ThemePalettes[self.CurrentTheme].Accent, Transparency = 1})
         local TopContent = Make("Frame", {Parent = NFrame, BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY}, { Make("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 10)}) })
-        local Logo = Make("ImageLabel", {Parent = TopContent, Size = UDim2.new(0, 28, 0, 28), BackgroundTransparency = 1, ImageTransparency = 1, Image = "rbxassetid://140506104309289"}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
+        local Logo = Make("ImageLabel", {Parent = TopContent, Size = UDim2.new(0, 28, 0, 28), BackgroundTransparency = 1, ImageTransparency = 1, Image = "rbxassetid://131775361395370"}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
         local TextContainer = Make("Frame", {Parent = TopContent, BackgroundTransparency = 1, AutomaticSize = Enum.AutomaticSize.XY}, { Make("UIListLayout", {Padding = UDim.new(0, 2)}), Make("UISizeConstraint", {MaxSize = Vector2.new(220, 9999)}) })
-        local NTitle = Make("TextLabel", {Parent = TextContainer, BackgroundTransparency = 1, TextTransparency = 1, Text = NConfig.Title or "ExHub X", TextColor3 = ExHub.ThemePalettes[self.CurrentTheme].Accent, Font = Enum.Font.GothamBold, TextSize = 10, TextXAlignment = Enum.TextXAlignment.Left, AutomaticSize = Enum.AutomaticSize.XY})
+        local NTitle = Make("TextLabel", {Parent = TextContainer, BackgroundTransparency = 1, TextTransparency = 1, Text = NConfig.Title or "Quantum X", TextColor3 = Quantum.ThemePalettes[self.CurrentTheme].Accent, Font = Enum.Font.GothamBold, TextSize = 10, TextXAlignment = Enum.TextXAlignment.Left, AutomaticSize = Enum.AutomaticSize.XY})
         local NText = Make("TextLabel", {Parent = TextContainer, BackgroundTransparency = 1, TextTransparency = 1, Text = NConfig.Text or "", TextColor3 = Color3.fromRGB(240, 240, 240), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, AutomaticSize = Enum.AutomaticSize.XY, TextWrapped = true})
         local ProgressBg = Make("Frame", {Parent = NFrame, Size = UDim2.new(1, 20, 0, 3), Position = UDim2.new(0, -10, 0, 0), BackgroundColor3 = Color3.fromRGB(30, 30, 40), BackgroundTransparency = 1, BorderSizePixel = 0})
-        local ProgressFill = Make("Frame", {Parent = ProgressBg, Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = ExHub.ThemePalettes[self.CurrentTheme].Accent, BackgroundTransparency = 1, BorderSizePixel = 0})
+        local ProgressFill = Make("Frame", {Parent = ProgressBg, Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Quantum.ThemePalettes[self.CurrentTheme].Accent, BackgroundTransparency = 1, BorderSizePixel = 0})
 
         Services.TweenService:Create(NFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0, 0, 0, 0)}):Play()
         Services.TweenService:Create(NFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0.1}):Play()
@@ -142,13 +164,13 @@ local MinBtn = Make("TextButton", {
         local IntroBlur = Make("BlurEffect", {Parent = Services.Lighting, Size = 0})
         local IntroGui = Make("ScreenGui", {Parent = Services.CoreGui})
         local CenterFrame = Make("Frame", {Parent = IntroGui, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1}, { Make("UIListLayout", {FillDirection = Enum.FillDirection.Horizontal, HorizontalAlignment = Enum.HorizontalAlignment.Center, VerticalAlignment = Enum.VerticalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 15)}) })
-        local IntroLogo = Make("ImageLabel", {Parent = CenterFrame, Image = "rbxassetid://140506104309289", Size = UDim2.new(0, 120, 0, 120), BackgroundTransparency = 1, ImageTransparency = 1, LayoutOrder = 1}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
+        local IntroLogo = Make("ImageLabel", {Parent = CenterFrame, Image = "rbxassetid://131775361395370", Size = UDim2.new(0, 120, 0, 120), BackgroundTransparency = 1, ImageTransparency = 1, LayoutOrder = 1}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
         local TextClip = Make("Frame", {Parent = CenterFrame, BackgroundTransparency = 1, ClipsDescendants = true, Size = UDim2.new(0, 0, 0, 120), LayoutOrder = 2})
-        local IntroText = Make("TextLabel", {Parent = TextClip, Text = "Quantum Community", Font = Enum.Font.GothamBlack, TextSize = 28, TextColor3 = ExHub.ThemePalettes[self.CurrentTheme].Accent, Size = UDim2.new(0, 320, 1, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+        local IntroText = Make("TextLabel", {Parent = TextClip, Text = "Quantum Community", Font = Enum.Font.GothamBlack, TextSize = 28, TextColor3 = Quantum.ThemePalettes[self.CurrentTheme].Accent, Size = UDim2.new(0, 320, 1, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
         local IntroTextStroke = Make("UIStroke", {Parent = IntroText, Color = Color3.fromRGB(0, 0, 0), Thickness = 2, Transparency = 0})
         local StatusText = Make("TextLabel", {Parent = IntroGui, Size = UDim2.new(1, 0, 0, 30), Position = UDim2.new(0, 0, 0.85, 0), BackgroundTransparency = 1, Font = Enum.Font.GothamBold, TextSize = 14, TextTransparency = 1})
 
-        if IntroConfig.IsSupported then StatusText.Text = "✅ Map Supported: " .. IntroConfig.MapName; StatusText.TextColor3 = ExHub.ThemePalettes[self.CurrentTheme].Accent
+        if IntroConfig.IsSupported then StatusText.Text = "✅ Map Supported: " .. IntroConfig.MapName; StatusText.TextColor3 = Quantum.ThemePalettes[self.CurrentTheme].Accent
         else StatusText.Text = "❌ Map Tidak Didukung!"; StatusText.TextColor3 = Color3.fromRGB(255, 80, 80) end
 
         local TS = Services.TweenService
@@ -191,12 +213,12 @@ local MinBtn = Make("TextButton", {
 
         Btn.MouseButton1Click:Connect(function()
             for _, t in pairs(self.Tabs) do t.Ico.TextColor3 = Color3.fromRGB(130, 130, 150); t.Txt.TextColor3 = Color3.fromRGB(130, 130, 150); t.Page.Visible = false end
-            IcoL.TextColor3 = ExHub.ThemePalettes[self.CurrentTheme].Accent; TxtL.TextColor3 = Color3.fromRGB(240, 240, 240); Page.Visible = true
+            IcoL.TextColor3 = Quantum.ThemePalettes[self.CurrentTheme].Accent; TxtL.TextColor3 = Color3.fromRGB(240, 240, 240); Page.Visible = true
         end)
         
         table.insert(self.Tabs, {Ico = IcoL, Txt = TxtL, Page = Page})
         if TabData.Order == 1 then
-            IcoL.TextColor3 = ExHub.ThemePalettes[self.CurrentTheme].Accent; TxtL.TextColor3 = Color3.fromRGB(240, 240, 240); Page.Visible = true
+            IcoL.TextColor3 = Quantum.ThemePalettes[self.CurrentTheme].Accent; TxtL.TextColor3 = Color3.fromRGB(240, 240, 240); Page.Visible = true
         end
 
         local TabAPI = {}
@@ -211,9 +233,9 @@ local MinBtn = Make("TextButton", {
             TabData.Counters = TabData.Counters + 1
             local VerWrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.3, Size = UDim2.new(0.96, 0, 0, 45)}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 6)}), 
-                Make("UIStroke", {Color = ExHub.ThemePalettes[Window.CurrentTheme].Accent}) 
+                Make("UIStroke", {Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent}) 
             })
-            Make("TextLabel", {Parent = VerWrap, Size = UDim2.new(1, -10, 0, 20), Position = UDim2.new(0, 5, 0, 5), BackgroundTransparency = 1, Text = VersionText, TextColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent, Font = Enum.Font.GothamBold, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left})
+            Make("TextLabel", {Parent = VerWrap, Size = UDim2.new(1, -10, 0, 20), Position = UDim2.new(0, 5, 0, 5), BackgroundTransparency = 1, Text = VersionText, TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Font = Enum.Font.GothamBold, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left})
             Make("TextLabel", {Parent = VerWrap, Size = UDim2.new(1, -10, 0, 20), Position = UDim2.new(0, 5, 0, 20), BackgroundTransparency = 1, Text = DateText, TextColor3 = Color3.fromRGB(130, 130, 150), Font = Enum.Font.GothamBold, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left})
         end
 
@@ -221,10 +243,10 @@ local MinBtn = Make("TextButton", {
             TabData.Counters = TabData.Counters + 1
             local LP = Services.Players.LocalPlayer
             local Box = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.3, Size = UDim2.new(0.96, 0, 0, 75)}, { Make("UICorner", {CornerRadius = UDim.new(0, 6)}) })
-            Make("UIStroke", {Parent = Box, Color = ExHub.ThemePalettes[Window.CurrentTheme].Accent, Transparency = 0.5})
+            Make("UIStroke", {Parent = Box, Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Transparency = 0.5})
             local Img = Make("ImageLabel", {Parent = Box, Size = UDim2.new(0, 55, 0, 55), Position = UDim2.new(0, 10, 0, 10), BackgroundColor3 = Color3.fromRGB(12, 12, 18)}, { Make("UICorner", {CornerRadius = UDim.new(1,0)}) })
             task.spawn(function() pcall(function() Img.Image = Services.Players:GetUserThumbnailAsync(LP.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420) end) end)
-            Make("TextLabel", {Parent = Box, Text = LP.DisplayName, Position = UDim2.new(0, 75, 0, 18), Size = UDim2.new(0, 150, 0, 15), Font = Enum.Font.GothamBold, TextColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent, TextSize = 11, BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+            Make("TextLabel", {Parent = Box, Text = LP.DisplayName, Position = UDim2.new(0, 75, 0, 18), Size = UDim2.new(0, 150, 0, 15), Font = Enum.Font.GothamBold, TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, TextSize = 11, BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
             Make("TextLabel", {Parent = Box, Text = "@" .. LP.Name, Position = UDim2.new(0, 75, 0, 35), Size = UDim2.new(0, 150, 0, 15), Font = Enum.Font.Gotham, TextColor3 = Color3.fromRGB(130, 130, 150), TextSize = 9, BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
         end
 
@@ -238,7 +260,7 @@ local MinBtn = Make("TextButton", {
         function TabAPI:AddInfoBox(LabelText)
             TabData.Counters = TabData.Counters + 1
             local Box = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.3, Size = UDim2.new(0.96, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y}, { Make("UICorner", {CornerRadius = UDim.new(0, 6)}), Make("UIPadding", {PaddingTop = UDim.new(0, 8), PaddingBottom = UDim.new(0, 8), PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)}) })
-            Make("UIStroke", {Parent = Box, Color = ExHub.ThemePalettes[Window.CurrentTheme].Accent, Transparency = 0.5})
+            Make("UIStroke", {Parent = Box, Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Transparency = 0.5})
             Make("TextLabel", {Parent = Box, Size = UDim2.new(1, 0, 0, 0), BackgroundTransparency = 1, Text = LabelText, TextColor3 = Color3.fromRGB(240, 240, 240), Font = Enum.Font.Gotham, TextSize = 9, TextWrapped = true, AutomaticSize = Enum.AutomaticSize.Y, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top})
         end
 
@@ -246,7 +268,7 @@ local MinBtn = Make("TextButton", {
             TabData.Counters = TabData.Counters + 1
             local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.6, Size = UDim2.new(1, -10, 0, 28)}, { Make("UICorner", {CornerRadius = UDim.new(0, 4)}) })
             Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(240, 240, 240), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
-            local Btn = Make("TextButton", {Parent = Section, Size = UDim2.new(0, 80, 0, 18), Position = UDim2.new(1, -90, 0.5, -9), BackgroundColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent, Text = Extra or "Click", TextColor3 = Color3.new(0, 0, 0), Font = Enum.Font.GothamBold, TextSize = 9}, { Make("UICorner", {CornerRadius = UDim.new(0, 4)}) })
+            local Btn = Make("TextButton", {Parent = Section, Size = UDim2.new(0, 80, 0, 18), Position = UDim2.new(1, -90, 0.5, -9), BackgroundColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Text = Extra or "Click", TextColor3 = Color3.new(0, 0, 0), Font = Enum.Font.GothamBold, TextSize = 9}, { Make("UICorner", {CornerRadius = UDim.new(0, 4)}) })
             Btn.MouseButton1Click:Connect(Callback)
         end
 
@@ -256,14 +278,14 @@ local MinBtn = Make("TextButton", {
             Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(240, 240, 240), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
             local On = false
             local Tog = Make("TextButton", {Parent = Section, Size = UDim2.new(0, 28, 0, 14), Position = UDim2.new(1, -35, 0.5, -7), Text = "", BackgroundColor3 = Color3.fromRGB(60, 60, 60)}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
-            Tog.MouseButton1Click:Connect(function() On = not On; Tog.BackgroundColor3 = On and ExHub.ThemePalettes[Window.CurrentTheme].Accent or Color3.fromRGB(60, 60, 60); Callback(On) end)
+            Tog.MouseButton1Click:Connect(function() On = not On; Tog.BackgroundColor3 = On and Quantum.ThemePalettes[Window.CurrentTheme].Accent or Color3.fromRGB(60, 60, 60); Callback(On) end)
         end
 
         function TabAPI:AddInput(LabelText, Callback, Placeholder)
             TabData.Counters = TabData.Counters + 1
             local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.6, Size = UDim2.new(1, -10, 0, 28)}, { Make("UICorner", {CornerRadius = UDim.new(0, 4)}) })
             Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(240, 240, 240), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
-            local Box = Make("TextBox", {Parent = Section, Size = UDim2.new(0, 70, 0, 18), Position = UDim2.new(1, -80, 0.5, -9), BackgroundColor3 = Color3.fromRGB(20, 20, 20), Text = "", PlaceholderText = Placeholder or "Set...", TextColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent, Font = Enum.Font.Gotham, TextSize = 9}, { Make("UICorner", {CornerRadius = UDim.new(0, 4)}) })
+            local Box = Make("TextBox", {Parent = Section, Size = UDim2.new(0, 70, 0, 18), Position = UDim2.new(1, -80, 0.5, -9), BackgroundColor3 = Color3.fromRGB(20, 20, 20), Text = "", PlaceholderText = Placeholder or "Set...", TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Font = Enum.Font.Gotham, TextSize = 9}, { Make("UICorner", {CornerRadius = UDim.new(0, 4)}) })
             Box.FocusLost:Connect(function() Callback(Box.Text) end)
         end
 
@@ -272,9 +294,9 @@ local MinBtn = Make("TextButton", {
             local Min, Max, Def = Opts.Min or 16, Opts.Max or 100, Opts.Def or 16
             local Wrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.6, Size = UDim2.new(1, -10, 0, 45)}, { Make("UICorner", {CornerRadius = UDim.new(0, 4)}) })
             Make("TextLabel", {Parent = Wrap, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(240, 240, 240), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, -10), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
-            local ValL = Make("TextLabel", {Parent = Wrap, Text = tostring(Def), Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent, Size = UDim2.new(0, 50, 0, 20), Position = UDim2.new(1, -60, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right})
+            local ValL = Make("TextLabel", {Parent = Wrap, Text = tostring(Def), Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Size = UDim2.new(0, 50, 0, 20), Position = UDim2.new(1, -60, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right})
             local SliderBg = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, -20, 0, 6), Position = UDim2.new(0, 10, 0, 28), BackgroundColor3 = Color3.fromRGB(50, 50, 60)}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
-            local SliderFill = Make("Frame", {Parent = SliderBg, Size = UDim2.new((Def - Min) / (Max - Min), 0, 1, 0), BackgroundColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
+            local SliderFill = Make("Frame", {Parent = SliderBg, Size = UDim2.new((Def - Min) / (Max - Min), 0, 1, 0), BackgroundColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
             local SliderBtn = Make("TextButton", {Parent = SliderBg, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Text = ""})
             local Dragging = false
             local function UpdateSlider(input)
@@ -300,8 +322,8 @@ local MinBtn = Make("TextButton", {
             local Checks = {}
             for i, optName in ipairs(Options) do
                 local RBtn = Make("TextButton", {Parent = RadioCont, Size = UDim2.new(0, 0, 1, 0), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1, Text = "", LayoutOrder = i})
-                local Circle = Make("Frame", {Parent = RBtn, Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(0, 0, 0.5, -7), BackgroundColor3 = Color3.fromRGB(20, 20, 25)}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}), Make("UIStroke", {Color = ExHub.ThemePalettes[Window.CurrentTheme].Accent}) })
-                Checks[optName] = Make("TextLabel", {Parent = Circle, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Text = "✓", TextColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent, TextSize = 10, Font = Enum.Font.GothamBold, Visible = (optName == Default)})
+                local Circle = Make("Frame", {Parent = RBtn, Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(0, 0, 0.5, -7), BackgroundColor3 = Color3.fromRGB(20, 20, 25)}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}), Make("UIStroke", {Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent}) })
+                Checks[optName] = Make("TextLabel", {Parent = Circle, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Text = "✓", TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, TextSize = 10, Font = Enum.Font.GothamBold, Visible = (optName == Default)})
                 Make("TextLabel", {Parent = RBtn, Size = UDim2.new(0, 0, 1, 0), Position = UDim2.new(0, 20, 0, 0), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1, Text = optName, TextColor3 = Color3.fromRGB(240, 240, 240), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center})
                 
                 RBtn.MouseButton1Click:Connect(function() for key, chk in pairs(Checks) do chk.Visible = (key == optName) end; Callback(optName) end)
@@ -315,7 +337,7 @@ local MinBtn = Make("TextButton", {
             local Head = Make("TextButton", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 35), BackgroundTransparency = 1, Text = ""})
             Make("TextLabel", {Parent = Head, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(240, 240, 240), Size = UDim2.new(0.5, 0, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
             local SelectedDisplay = Make("TextLabel", {Parent = Head, Text = "...", Font = Enum.Font.Gotham, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(0.5, -30, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right})
-            local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(1, -22, 0.5, -7), BackgroundTransparency = 1, ImageColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent})
+            local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(1, -22, 0.5, -7), BackgroundTransparency = 1, ImageColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent})
             local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 35), BackgroundTransparency = 1})
             local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -16, 1, -10), Position = UDim2.new(0, 8, 0, 5), BackgroundColor3 = Color3.fromRGB(22, 22, 28), ScrollBarThickness = 2, BorderSizePixel = 0}, { Make("UICorner", {CornerRadius = UDim.new(0, 6)}), Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5}), Make("UIPadding", {PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5)}) })
             local SL = Make("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder})
@@ -361,7 +383,7 @@ local MinBtn = Make("TextButton", {
             local Head = Make("TextButton", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 35), BackgroundTransparency = 1, Text = ""})
             Make("TextLabel", {Parent = Head, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(240, 240, 240), Size = UDim2.new(0.5, 0, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
             local SelectedDisplay = Make("TextLabel", {Parent = Head, Text = "Select...", Font = Enum.Font.Gotham, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(0.5, -30, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right})
-            local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(1, -22, 0.5, -7), BackgroundTransparency = 1, ImageColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent})
+            local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(1, -22, 0.5, -7), BackgroundTransparency = 1, ImageColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent})
             local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 35), BackgroundTransparency = 1})
             local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -16, 1, -10), Position = UDim2.new(0, 8, 0, 5), BackgroundColor3 = Color3.fromRGB(22, 22, 28), ScrollBarThickness = 2, BorderSizePixel = 0}, { Make("UICorner", {CornerRadius = UDim.new(0, 6)}), Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5}), Make("UIPadding", {PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5)}) })
             local SL = Make("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder})
@@ -403,7 +425,7 @@ local MinBtn = Make("TextButton", {
                             PendingBtn = B
                             PendingItemName = item.Name
                             B.Text = "   [ Tap again to teleport ]"
-                            B.TextColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent
+                            B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent
                             Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 50), BackgroundTransparency = 0}):Play()
                         end
                     end)
@@ -432,7 +454,7 @@ local MinBtn = Make("TextButton", {
             local Head = Make("TextButton", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 35), BackgroundTransparency = 1, Text = ""})
             Make("TextLabel", {Parent = Head, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(240, 240, 240), Size = UDim2.new(0.5, 0, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
             local SelectedDisplay = Make("TextLabel", {Parent = Head, Text = "Select...", Font = Enum.Font.Gotham, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(0.5, -30, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right, TextTruncate = Enum.TextTruncate.AtEnd})
-            local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(1, -22, 0.5, -7), BackgroundTransparency = 1, ImageColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent})
+            local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(1, -22, 0.5, -7), BackgroundTransparency = 1, ImageColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent})
             local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 35), BackgroundTransparency = 1})
             local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -16, 1, -10), Position = UDim2.new(0, 8, 0, 5), BackgroundColor3 = Color3.fromRGB(22, 22, 28), ScrollBarThickness = 2, BorderSizePixel = 0}, { Make("UICorner", {CornerRadius = UDim.new(0, 6)}), Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5}), Make("UIPadding", {PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5)}) })
             local SL = Make("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder})
@@ -455,7 +477,7 @@ local MinBtn = Make("TextButton", {
                 for i, itemStr in ipairs(items) do
                     local B = Make("TextButton", {Parent = Scroll, Size = UDim2.new(1, 0, 0, 26), BackgroundTransparency = 1, Text = "   " .. tostring(itemStr), TextColor3 = Color3.fromRGB(130, 130, 150), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = i})
                     
-                    if table.find(SelectedItems, itemStr) then B.TextColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent end
+                    if table.find(SelectedItems, itemStr) then B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent end
 
                     B.MouseEnter:Connect(function() Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 35, 45), BackgroundTransparency = 0}):Play() end)
                     B.MouseLeave:Connect(function() Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play() end)
@@ -467,7 +489,7 @@ local MinBtn = Make("TextButton", {
                             B.TextColor3 = Color3.fromRGB(130, 130, 150)
                         else
                             table.insert(SelectedItems, itemStr)
-                            B.TextColor3 = ExHub.ThemePalettes[Window.CurrentTheme].Accent
+                            B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent
                         end
                         UpdateDisplay()
                         Callback(SelectedItems)
@@ -493,4 +515,4 @@ local MinBtn = Make("TextButton", {
     return Window
 end
 
-return ExHub
+return Quantum
