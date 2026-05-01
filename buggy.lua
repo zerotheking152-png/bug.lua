@@ -3,8 +3,7 @@ local Services = {
     TweenService = game:GetService("TweenService"),
     UserInputService = game:GetService("UserInputService"),
     CoreGui = game:GetService("CoreGui"),
-    Lighting = game:GetService("Lighting"),
-    RunService = game:GetService("RunService")
+    Lighting = game:GetService("Lighting")
 }
 
 local function Make(className, properties, children)
@@ -17,170 +16,6 @@ local function Make(className, properties, children)
     return inst
 end
 
--- ══════════════════════════════════════════════════════
---  DRAGON PIXEL ART BUILDER
---  Draws a natural-looking dragon using Frame pixels
---  Two frames (A/B) for wing-flap animation
--- ══════════════════════════════════════════════════════
-local function BuildDragon(parent)
-    -- Color palette  (natural greens, no neon)
-    local C = {
-        body  = Color3.fromRGB(34,  110, 55),   -- mid green
-        dark  = Color3.fromRGB(18,  68,  35),   -- shadow
-        light = Color3.fromRGB(72,  160, 90),   -- highlight
-        belly = Color3.fromRGB(140, 195, 120),  -- belly/underbelly
-        eye   = Color3.fromRGB(255, 200,  40),  -- amber eye
-        wing  = Color3.fromRGB(24,  90,  44),   -- wing membrane
-        wingL = Color3.fromRGB(50,  130, 68),   -- wing light
-        horn  = Color3.fromRGB(90,  140, 70),   -- horn/spike
-        flame = Color3.fromRGB(220, 130,  30),  -- breath tint
-        T     = "transparent",
-    }
-
-    -- PS = pixel size in px; canvas is 56×44
-    local PS = 4
-    local W, H = 14, 11   -- grid cols, rows
-
-    -- Frame A  (wings up)
-    local gridA = {
-        --1    2    3    4    5    6    7    8    9   10   11   12   13   14
-        {"T","T","T","h","h","T","T","T","T","T","T","T","T","T"},  -- 1
-        {"T","T","d","b","b","d","T","wL","w","wL","T","T","T","T"},-- 2  wings up
-        {"T","d","b","l","b","b","d","w","w","w","wL","T","T","T"}, -- 3
-        {"T","d","b","b","e","b","b","d","w","w","w","wL","T","T"}, -- 4
-        {"T","T","d","b","b","b","b","d","d","w","w","T","T","T"},  -- 5
-        {"T","T","T","d","B","B","b","b","d","d","T","T","T","T"},  -- 6
-        {"T","T","T","T","d","B","B","b","b","d","T","T","T","T"},  -- 7
-        {"T","T","T","T","T","d","b","b","b","d","T","T","T","T"},  -- 8
-        {"T","T","T","T","T","T","d","b","d","T","T","T","T","T"},  -- 9  tail
-        {"T","T","T","T","T","T","d","b","d","T","T","T","T","T"},  -- 10
-        {"T","T","T","T","T","T","T","d","T","T","T","T","T","T"},  -- 11 tail tip
-    }
-
-    -- Frame B  (wings mid)
-    local gridB = {
-        --1    2    3    4    5    6    7    8    9   10   11   12   13   14
-        {"T","T","T","h","h","T","T","T","T","T","T","T","T","T"},  -- 1
-        {"T","T","d","b","b","d","T","T","T","T","T","T","T","T"},  -- 2  wings level
-        {"T","d","b","l","b","b","d","wL","w","wL","T","T","T","T"},-- 3
-        {"T","d","b","b","e","b","b","d","w","w","wL","T","T","T"}, -- 4
-        {"T","T","d","b","b","b","b","d","d","w","w","T","T","T"},  -- 5
-        {"T","T","T","d","B","B","b","b","d","d","T","T","T","T"},  -- 6
-        {"T","T","T","T","d","B","B","b","b","d","T","T","T","T"},  -- 7
-        {"T","T","T","T","T","d","b","b","b","d","T","T","T","T"},  -- 8
-        {"T","T","T","T","T","T","d","b","d","T","T","T","T","T"},  -- 9
-        {"T","T","T","T","T","T","d","b","d","T","T","T","T","T"},  -- 10
-        {"T","T","T","T","T","T","T","d","T","T","T","T","T","T"},  -- 11
-    }
-
-    local colorMap = {
-        b  = C.body,  d = C.dark, l = C.light,
-        B  = C.belly, e = C.eye,  w = C.wing,
-        wL = C.wingL, h = C.horn, T = nil,
-    }
-
-    -- Container for the whole dragon (sits top-left)
-    local Container = Make("Frame", {
-        Parent = parent,
-        Size = UDim2.new(0, W * PS, 0, H * PS),
-        Position = UDim2.new(0, 4, 0, 4),
-        BackgroundTransparency = 1,
-        ZIndex = 10,
-        ClipsDescendants = false,
-    })
-
-    -- Build one frame-set of pixels
-    local function BuildGrid(grid, zidx)
-        local holder = Make("Frame", {
-            Parent = Container,
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            ZIndex = zidx,
-        })
-        for row = 1, H do
-            for col = 1, W do
-                local key = grid[row] and grid[row][col] or "T"
-                local col3 = colorMap[key]
-                if col3 then
-                    Make("Frame", {
-                        Parent = holder,
-                        Size = UDim2.new(0, PS, 0, PS),
-                        Position = UDim2.new(0, (col-1)*PS, 0, (row-1)*PS),
-                        BackgroundColor3 = col3,
-                        BorderSizePixel = 0,
-                        ZIndex = zidx,
-                    })
-                end
-            end
-        end
-        return holder
-    end
-
-    local frameA = BuildGrid(gridA, 10)
-    local frameB = BuildGrid(gridB, 10)
-    frameB.Visible = false
-
-    -- Breath particle (small orange dot that pulses at mouth)
-    local Breath = Make("Frame", {
-        Parent = Container,
-        Size = UDim2.new(0, 5, 0, 5),
-        Position = UDim2.new(0, -6, 0, 3*PS),   -- in front of snout
-        BackgroundColor3 = C.flame,
-        BorderSizePixel = 0,
-        BackgroundTransparency = 1,
-        ZIndex = 11,
-    })
-    local BreathCorner = Make("UICorner", {CornerRadius = UDim.new(1,0), Parent = Breath})
-
-    -- ── Animation loop ──────────────────────────────────
-    local tick = 0
-    local flapSpeed = 1.6   -- seconds per full flap cycle
-    local bobAmp   = 2.5    -- pixels up/down
-    local breathCycle = 0
-    local conn
-
-    conn = Services.RunService.RenderStepped:Connect(function(dt)
-        if not Container.Parent then conn:Disconnect() return end
-
-        tick = tick + dt
-
-        -- Wing flap (alternate frames)
-        local flap = math.sin(tick * math.pi * 2 / flapSpeed)
-        if flap > 0 then
-            frameA.Visible = true
-            frameB.Visible = false
-        else
-            frameA.Visible = false
-            frameB.Visible = true
-        end
-
-        -- Bob up/down gently
-        local bobY = math.sin(tick * math.pi * 2 / flapSpeed) * bobAmp
-        Container.Position = UDim2.new(0, 4, 0, 4 + bobY)
-
-        -- Breath glow pulse (every ~3s)
-        breathCycle = breathCycle + dt
-        if breathCycle > 3 then
-            breathCycle = 0
-            -- quick breath flash
-            Breath.BackgroundTransparency = 0
-            Services.TweenService:Create(Breath, TweenInfo.new(0.08), {Size = UDim2.new(0,8,0,8), Position = UDim2.new(0,-10,0,3*PS-1)}):Play()
-            task.delay(0.12, function()
-                Services.TweenService:Create(Breath, TweenInfo.new(0.25), {
-                    Size = UDim2.new(0,5,0,5),
-                    Position = UDim2.new(0,-6,0,3*PS),
-                    BackgroundTransparency = 1
-                }):Play()
-            end)
-        end
-    end)
-
-    return Container
-end
-
--- ══════════════════════════════════════════════════════
---  QUANTUM  (original library, dragon injected below)
--- ══════════════════════════════════════════════════════
 local Quantum = {}
 Quantum.ThemePalettes = {
     ["Default Hitam"] = {
@@ -188,21 +23,25 @@ Quantum.ThemePalettes = {
         Grad1 = Color3.fromRGB(0, 0, 0),
         Grad2 = Color3.fromRGB(255, 255, 255)
     },
+
     ["Sunset Orange"] = {
         Accent = Color3.fromRGB(255, 120, 0),
         Grad1 = Color3.fromRGB(30, 10, 0),
         Grad2 = Color3.fromRGB(120, 40, 0)
     },
+
     ["Matrix Green"] = {
         Accent = Color3.fromRGB(0, 255, 100),
         Grad1 = Color3.fromRGB(0, 15, 5),
         Grad2 = Color3.fromRGB(0, 70, 20)
     },
+
     ["Blood Red"] = {
         Accent = Color3.fromRGB(255, 50, 50),
         Grad1 = Color3.fromRGB(20, 5, 5),
         Grad2 = Color3.fromRGB(90, 0, 0)
     },
+
     ["Neon Green"] = {
         Accent = Color3.fromRGB(57, 255, 20),
         Grad1 = Color3.fromRGB(0, 25, 0),
@@ -219,41 +58,158 @@ function Quantum.Build(Config)
 
     Window.ScreenGui = Make("ScreenGui", {Name = "QuantumXOpenSource", Parent = Services.CoreGui, ResetOnSpawn = false})
     Window.NotifContainer = Make("Frame", {Parent = Window.ScreenGui, Size = UDim2.new(0, 300, 1, -20), Position = UDim2.new(1, -10, 0, 0), AnchorPoint = Vector2.new(1, 0), BackgroundTransparency = 1}, { Make("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Bottom, HorizontalAlignment = Enum.HorizontalAlignment.Right, Padding = UDim.new(0, 8)}) })
-
+    
     Window.MainFrame = Make("CanvasGroup", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(255, 255, 255), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, 0), Size = UDim2.new(0, 400, 0, 260), Visible = false, GroupTransparency = 1, Active = true, Draggable = true}, {
         Make("UICorner", {CornerRadius = UDim.new(0, 10)}),
         Make("UIGradient", {Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Theme.Grad1), ColorSequenceKeypoint.new(1.00, Theme.Grad2)}, Rotation = 45})
     })
 
-    -- ► Inject Dragon into MainFrame top-left ◄
-    BuildDragon(Window.MainFrame)
+    
+    -- PIXEL DRAGON - Flying Animation in Top-Left Corner
+    Window.DragonFrame = Make("Frame", {
+        Parent = Window.ScreenGui,
+        Name = "PixelDragon",
+        Size = UDim2.new(0, 140, 0, 140),
+        Position = UDim2.new(0, 10, 0, 10),
+        BackgroundTransparency = 1,
+        ZIndex = 9999
+    })
 
-    Window.ToggleBtn = Make("ImageButton", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(12, 12, 18), AnchorPoint = Vector2.new(0,0.5), Position = UDim2.new(0, 20, 0.5, 0), Size = UDim2.new(0, 40, 0, 40), Image = Config.ToggleIcon or "rbxassetid://131775361395370", Visible = false, Draggable = true}, { Make("UICorner", {CornerRadius = UDim.new(0, 12)}), Make("UIStroke", {Color = Theme.Accent}) })
+    -- Dragon shadow/glow effect
+    Window.DragonGlow = Make("ImageLabel", {
+        Parent = Window.DragonFrame,
+        Name = "DragonGlow",
+        Size = UDim2.new(1.3, 0, 1.3, 0),
+        Position = UDim2.new(-0.15, 0, -0.15, 0),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://131775361395370",
+        ImageColor3 = Color3.fromRGB(0, 255, 100),
+        ImageTransparency = 0.85,
+        ZIndex = 9998
+    })
 
+    -- Main Dragon Image - Pixel Art Green Dragon
+    Window.DragonImage = Make("ImageLabel", {
+        Parent = Window.DragonFrame,
+        Name = "DragonImage",
+        Size = UDim2.new(1, 0, 1, 0),
+        Position = UDim2.new(0, 0, 0, 0),
+        BackgroundTransparency = 1,
+        Image = "rbxassetid://131775361395370",
+        ImageColor3 = Color3.fromRGB(0, 255, 100),
+        ZIndex = 9999
+    })
+
+    -- Pixel border effect (8-bit style border)
+    Window.DragonBorder = Make("Frame", {
+        Parent = Window.DragonFrame,
+        Name = "DragonBorder",
+        Size = UDim2.new(1, 4, 1, 4),
+        Position = UDim2.new(0, -2, 0, -2),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ZIndex = 9997
+    })
+
+    -- Pixel corner accents
+    for _, pos in pairs({
+        {0, 0}, {1, 0}, {0, 1}, {1, 1}
+    }) do
+        local corner = Make("Frame", {
+            Parent = Window.DragonBorder,
+            Size = UDim2.new(0, 6, 0, 6),
+            Position = UDim2.new(pos[1], pos[1] == 0 and -3 or -3, pos[2], pos[2] == 0 and -3 or -3),
+            BackgroundColor3 = Color3.fromRGB(0, 255, 100),
+            BorderSizePixel = 0,
+            ZIndex = 9997
+        })
+    end
+
+    -- Flying animation using TweenService
+    local function AnimateDragon()
+        while Window.DragonFrame and Window.DragonFrame.Parent do
+            -- Hover up and down (flying motion)
+            local hoverTween = Services.TweenService:Create(
+                Window.DragonFrame,
+                TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                {Position = UDim2.new(0, 10, 0, 0)}
+            )
+            hoverTween:Play()
+            hoverTween.Completed:Wait()
+
+            if not Window.DragonFrame or not Window.DragonFrame.Parent then break end
+
+            local hoverTween2 = Services.TweenService:Create(
+                Window.DragonFrame,
+                TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                {Position = UDim2.new(0, 10, 0, 20)}
+            )
+            hoverTween2:Play()
+            hoverTween2.Completed:Wait()
+
+            if not Window.DragonFrame or not Window.DragonFrame.Parent then break end
+        end
+    end
+
+    -- Glow pulse animation
+    local function PulseGlow()
+        while Window.DragonGlow and Window.DragonGlow.Parent do
+            local pulseTween = Services.TweenService:Create(
+                Window.DragonGlow,
+                TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                {ImageTransparency = 0.7}
+            )
+            pulseTween:Play()
+            pulseTween.Completed:Wait()
+
+            if not Window.DragonGlow or not Window.DragonGlow.Parent then break end
+
+            local pulseTween2 = Services.TweenService:Create(
+                Window.DragonGlow,
+                TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                {ImageTransparency = 0.9}
+            )
+            pulseTween2:Play()
+            pulseTween2.Completed:Wait()
+
+            if not Window.DragonGlow or not Window.DragonGlow.Parent then break end
+        end
+    end
+
+    -- Start animations
+    task.spawn(AnimateDragon)
+    task.spawn(PulseGlow)
+
+Window.ToggleBtn = Make("ImageButton", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(12, 12, 18), AnchorPoint = Vector2.new(0,0.5), Position = UDim2.new(0, 20, 0.5, 0), Size = UDim2.new(0, 40, 0, 40), Image = Config.ToggleIcon or "rbxassetid://131775361395370", Visible = false, Draggable = true}, { Make("UICorner", {CornerRadius = UDim.new(0, 12)}), Make("UIStroke", {Color = Theme.Accent}) })
+    
     local InnerFrame = Make("Frame", {Parent = Window.MainFrame, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ClipsDescendants = true}, { Make("UICorner", {CornerRadius = UDim.new(0, 10)}) })
-    Make("TextLabel", {Parent = InnerFrame, Text = Config.Title .. " | " .. Config.Subtitle, TextColor3 = Theme.Accent, Font = Enum.Font.GothamBlack, TextSize = 11, Position = UDim2.new(0, 70, 0, 10), Size = UDim2.new(0, 200, 0, 15), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+    Make("TextLabel", {Parent = InnerFrame, Text = Config.Title .. " | " .. Config.Subtitle, TextColor3 = Theme.Accent, Font = Enum.Font.GothamBlack, TextSize = 11, Position = UDim2.new(0, 15, 0, 10), Size = UDim2.new(0, 200, 0, 15), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
 
-    local CloseBtn = Make("TextButton", {
-        Parent = InnerFrame,
-        Text = "X",
-        TextColor3 = Color3.fromRGB(255, 80, 80),
-        BackgroundTransparency = 1,
-        Font = Enum.Font.GothamBold,
-        TextSize = 20,
-        Size = UDim2.new(0, 25, 0, 25),
-        Position = UDim2.new(0, 370, 0, 5)
-    }, { Make("UIStroke", {Color = Color3.fromRGB(255, 50, 50), Thickness = 2}) })
+local CloseBtn = Make("TextButton", {
+    Parent = InnerFrame,
+    Text = "X",
+    TextColor3 = Color3.fromRGB(255, 80, 80),
+    BackgroundTransparency = 1,
+    Font = Enum.Font.GothamBold,
+    TextSize = 20,
+    Size = UDim2.new(0, 25, 0, 25),
+    Position = UDim2.new(0, 370, 0, 5)
+}, {
+    Make("UIStroke", {Color = Color3.fromRGB(255, 50, 50), Thickness = 2}),
+})
 
-    local MinBtn = Make("TextButton", {
-        Parent = InnerFrame,
-        Text = "-",
-        TextColor3 = Color3.fromRGB(130, 130, 150),
-        BackgroundTransparency = 1,
-        Font = Enum.Font.GothamBold,
-        TextSize = 26,
-        Size = UDim2.new(0, 25, 0, 25),
-        Position = UDim2.new(0, 345, 0, 5)
-    }, { Make("UIStroke", {Color = Color3.fromRGB(130, 130, 150), Thickness = 2}) })
+local MinBtn = Make("TextButton", {
+    Parent = InnerFrame,
+    Text = "-",
+    TextColor3 = Color3.fromRGB(130, 130, 150),
+    BackgroundTransparency = 1,
+    Font = Enum.Font.GothamBold,
+    TextSize = 26,
+    Size = UDim2.new(0, 25, 0, 25),
+    Position = UDim2.new(0, 345, 0, 5)
+}, {
+    Make("UIStroke", {Color = Color3.fromRGB(130, 130, 150), Thickness = 2}),
+})
 
     local Body = Make("Frame", {Parent = InnerFrame, Size = UDim2.new(1, 0, 1, -35), Position = UDim2.new(0, 0, 0, 30), BackgroundTransparency = 1})
     Window.Sidebar = Make("ScrollingFrame", {Parent = Body, BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.5, Size = UDim2.new(0, 110, 1, 0), BorderSizePixel = 0, ScrollBarThickness = 2}, { Make("UICorner", {CornerRadius = UDim.new(0, 8)}) })
@@ -366,7 +322,7 @@ function Quantum.Build(Config)
         local Btn = Make("TextButton", {Parent = self.Sidebar, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 35), Text = "", LayoutOrder = TabData.Order})
         local IcoL = Make("TextLabel", {Parent = Btn, Text = Icon, Size = UDim2.new(0, 30, 1, 0), Position = UDim2.new(0, 15, 0, 0), TextColor3 = Color3.fromRGB(130, 130, 150), BackgroundTransparency = 1, TextSize = 14})
         local TxtL = Make("TextLabel", {Parent = Btn, Text = Name, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(1, -50, 1, 0), Position = UDim2.new(0, 47, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
-
+        
         local Page = Make("ScrollingFrame", {Parent = self.Content, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Visible = false, ScrollBarThickness = 2}, { Make("UIPadding", {PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 20)}) })
         local PL = Make("UIListLayout", {Parent = Page, Padding = UDim.new(0, 5), SortOrder = Enum.SortOrder.LayoutOrder})
         PL:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Page.CanvasSize = UDim2.new(0, 0, 0, PL.AbsoluteContentSize.Y + 30) end)
@@ -375,14 +331,14 @@ function Quantum.Build(Config)
             for _, t in pairs(self.Tabs) do t.Ico.TextColor3 = Color3.fromRGB(130, 130, 150); t.Txt.TextColor3 = Color3.fromRGB(130, 130, 150); t.Page.Visible = false end
             IcoL.TextColor3 = Quantum.ThemePalettes[self.CurrentTheme].Accent; TxtL.TextColor3 = Color3.fromRGB(240, 240, 240); Page.Visible = true
         end)
-
+        
         table.insert(self.Tabs, {Ico = IcoL, Txt = TxtL, Page = Page})
         if TabData.Order == 1 then
             IcoL.TextColor3 = Quantum.ThemePalettes[self.CurrentTheme].Accent; TxtL.TextColor3 = Color3.fromRGB(240, 240, 240); Page.Visible = true
         end
 
         local TabAPI = {}
-
+        
         function TabAPI:AddLabel(LabelText)
             TabData.Counters = TabData.Counters + 1
             local Label = Make("TextLabel", {Parent = Page, Size = UDim2.new(1, -10, 0, 18), BackgroundTransparency = 1, Text = LabelText, TextColor3 = Color3.fromRGB(180, 180, 180), Font = Enum.Font.GothamBold, TextSize = 8, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = TabData.Counters})
@@ -391,9 +347,9 @@ function Quantum.Build(Config)
 
         function TabAPI:AddVersionBox(VersionText, DateText)
             TabData.Counters = TabData.Counters + 1
-            local VerWrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.3, Size = UDim2.new(0.96, 0, 0, 45)}, {
-                Make("UICorner", {CornerRadius = UDim.new(0, 6)}),
-                Make("UIStroke", {Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent})
+            local VerWrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.3, Size = UDim2.new(0.96, 0, 0, 45)}, { 
+                Make("UICorner", {CornerRadius = UDim.new(0, 6)}), 
+                Make("UIStroke", {Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent}) 
             })
             Make("TextLabel", {Parent = VerWrap, Size = UDim2.new(1, -10, 0, 20), Position = UDim2.new(0, 5, 0, 5), BackgroundTransparency = 1, Text = VersionText, TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Font = Enum.Font.GothamBold, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left})
             Make("TextLabel", {Parent = VerWrap, Size = UDim2.new(1, -10, 0, 20), Position = UDim2.new(0, 5, 0, 20), BackgroundTransparency = 1, Text = DateText, TextColor3 = Color3.fromRGB(130, 130, 150), Font = Enum.Font.GothamBold, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left})
@@ -474,15 +430,18 @@ function Quantum.Build(Config)
             TabData.Counters = TabData.Counters + 1
             local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.6, Size = UDim2.new(1, -10, 0, 28)}, { Make("UICorner", {CornerRadius = UDim.new(0, 4)}) })
             Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(240, 240, 240), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+            
             local Options = Opts.Options or {"Opt1", "Opt2"}
             local Default = Opts.Default or Options[1]
             local RadioCont = Make("Frame", {Parent = Section, Size = UDim2.new(1, -110, 1, 0), Position = UDim2.new(0, 110, 0, 0), BackgroundTransparency = 1}, { Make("UIListLayout", {FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 15)}) })
+            
             local Checks = {}
             for i, optName in ipairs(Options) do
                 local RBtn = Make("TextButton", {Parent = RadioCont, Size = UDim2.new(0, 0, 1, 0), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1, Text = "", LayoutOrder = i})
                 local Circle = Make("Frame", {Parent = RBtn, Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(0, 0, 0.5, -7), BackgroundColor3 = Color3.fromRGB(20, 20, 25)}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}), Make("UIStroke", {Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent}) })
                 Checks[optName] = Make("TextLabel", {Parent = Circle, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Text = "✓", TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, TextSize = 10, Font = Enum.Font.GothamBold, Visible = (optName == Default)})
                 Make("TextLabel", {Parent = RBtn, Size = UDim2.new(0, 0, 1, 0), Position = UDim2.new(0, 20, 0, 0), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1, Text = optName, TextColor3 = Color3.fromRGB(240, 240, 240), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center})
+                
                 RBtn.MouseButton1Click:Connect(function() for key, chk in pairs(Checks) do chk.Visible = (key == optName) end; Callback(optName) end)
             end
             return Section
@@ -498,28 +457,39 @@ function Quantum.Build(Config)
             local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 35), BackgroundTransparency = 1})
             local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -16, 1, -10), Position = UDim2.new(0, 8, 0, 5), BackgroundColor3 = Color3.fromRGB(22, 22, 28), ScrollBarThickness = 2, BorderSizePixel = 0}, { Make("UICorner", {CornerRadius = UDim.new(0, 6)}), Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5}), Make("UIPadding", {PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5)}) })
             local SL = Make("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder})
+            
             local IsOpen = false
+            
             local function BuildList(ItemsList)
                 for _, v in pairs(Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
                 local validItems = ItemsList or {}
                 if #validItems == 0 then validItems = {"[Kosong]"} end
+                
                 for i, opt in ipairs(validItems) do
                     local B = Make("TextButton", {Parent = Scroll, Size = UDim2.new(1, 0, 0, 26), BackgroundTransparency = 1, Text = "   " .. tostring(opt), TextColor3 = Color3.fromRGB(130, 130, 150), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = i})
                     B.MouseEnter:Connect(function() Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 35, 45), BackgroundTransparency = 0}):Play() end)
                     B.MouseLeave:Connect(function() Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play() end)
-                    B.MouseButton1Click:Connect(function()
-                        if opt ~= "[Kosong]" then SelectedDisplay.Text = tostring(opt); SelectedDisplay.TextColor3 = Color3.fromRGB(240, 240, 240); Callback(opt) end
-                        Head.MouseButton1Click:Fire()
+                    B.MouseButton1Click:Connect(function() 
+                        if opt ~= "[Kosong]" then
+                            SelectedDisplay.Text = tostring(opt)
+                            SelectedDisplay.TextColor3 = Color3.fromRGB(240, 240, 240)
+                            Callback(opt) 
+                        end
+                        Head.MouseButton1Click:Fire() 
                     end)
                 end
                 Scroll.CanvasSize = UDim2.new(0,0,0,SL.AbsoluteContentSize.Y + 10)
             end
+
             Head.MouseButton1Click:Connect(function()
                 IsOpen = not IsOpen
-                if IsOpen then if type(Opts) == "function" then BuildList(Opts()) else BuildList(Opts) end end
+                if IsOpen then
+                    if type(Opts) == "function" then BuildList(Opts()) else BuildList(Opts) end
+                end
                 Services.TweenService:Create(Wrap, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = IsOpen and UDim2.new(1, -10, 0, 150) or UDim2.new(1, -10, 0, 35)}):Play()
                 Services.TweenService:Create(Arrow, TweenInfo.new(0.3), {Rotation = IsOpen and 180 or 0}):Play()
             end)
+            
             if type(Opts) ~= "function" then BuildList(Opts) end
         end
 
@@ -533,28 +503,54 @@ function Quantum.Build(Config)
             local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 35), BackgroundTransparency = 1})
             local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -16, 1, -10), Position = UDim2.new(0, 8, 0, 5), BackgroundColor3 = Color3.fromRGB(22, 22, 28), ScrollBarThickness = 2, BorderSizePixel = 0}, { Make("UICorner", {CornerRadius = UDim.new(0, 6)}), Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5}), Make("UIPadding", {PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5)}) })
             local SL = Make("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder})
+            
             local IsOpen = false
             local PendingBtn = nil
             local PendingItemName = nil
+
             local function ResetPending()
-                if PendingBtn and PendingBtn.Parent then PendingBtn.Text = "   " .. tostring(PendingItemName); PendingBtn.TextColor3 = Color3.fromRGB(130, 130, 150); Services.TweenService:Create(PendingBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 1}):Play() end
-                PendingBtn = nil; PendingItemName = nil
+                if PendingBtn and PendingBtn.Parent then
+                    PendingBtn.Text = "   " .. tostring(PendingItemName)
+                    PendingBtn.TextColor3 = Color3.fromRGB(130, 130, 150)
+                    Services.TweenService:Create(PendingBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 1}):Play()
+                end
+                PendingBtn = nil
+                PendingItemName = nil
             end
+
             local function BuildItems(items)
                 ResetPending()
                 for _, v in pairs(Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
                 for i, item in ipairs(items) do
                     local B = Make("TextButton", {Parent = Scroll, Size = UDim2.new(1, 0, 0, 26), BackgroundTransparency = 1, Text = "   " .. item.Name, TextColor3 = Color3.fromRGB(130, 130, 150), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = i})
-                    B.MouseEnter:Connect(function() if PendingBtn ~= B then Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 35, 45), BackgroundTransparency = 0}):Play() end end)
-                    B.MouseLeave:Connect(function() if PendingBtn ~= B then Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play() end end)
+                    B.MouseEnter:Connect(function() 
+                        if PendingBtn ~= B then Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 35, 45), BackgroundTransparency = 0}):Play() end
+                    end)
+                    B.MouseLeave:Connect(function() 
+                        if PendingBtn ~= B then Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play() end
+                    end)
                     B.MouseButton1Click:Connect(function()
-                        if PendingBtn == B then SelectedDisplay.Text = item.Name; SelectedDisplay.TextColor3 = Color3.fromRGB(240, 240, 240); ResetPending(); Callback(item.Pos); Head.MouseButton1Click:Fire()
-                        else ResetPending(); PendingBtn = B; PendingItemName = item.Name; B.Text = "   [ Tap again to teleport ]"; B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent; Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 50), BackgroundTransparency = 0}):Play() end
+                        if PendingBtn == B then
+                            SelectedDisplay.Text = item.Name
+                            SelectedDisplay.TextColor3 = Color3.fromRGB(240, 240, 240)
+                            ResetPending()
+                            Callback(item.Pos)
+                            Head.MouseButton1Click:Fire()
+                        else
+                            ResetPending()
+                            PendingBtn = B
+                            PendingItemName = item.Name
+                            B.Text = "   [ Tap again to teleport ]"
+                            B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent
+                            Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 50), BackgroundTransparency = 0}):Play()
+                        end
                     end)
                 end
                 Scroll.CanvasSize = UDim2.new(0, 0, 0, SL.AbsoluteContentSize.Y + 10)
             end
+            
             BuildItems(Opts)
+            
             Head.MouseButton1Click:Connect(function()
                 IsOpen = not IsOpen
                 if IsOpen and LabelText == "Teleport to Player" then
@@ -578,29 +574,48 @@ function Quantum.Build(Config)
             local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 35), BackgroundTransparency = 1})
             local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -16, 1, -10), Position = UDim2.new(0, 8, 0, 5), BackgroundColor3 = Color3.fromRGB(22, 22, 28), ScrollBarThickness = 2, BorderSizePixel = 0}, { Make("UICorner", {CornerRadius = UDim.new(0, 6)}), Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5}), Make("UIPadding", {PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5)}) })
             local SL = Make("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder})
+            
             local IsOpen = false
             local SelectedItems = {}
+
             local function UpdateDisplay()
-                if #SelectedItems == 0 then SelectedDisplay.Text = "Select..."; SelectedDisplay.TextColor3 = Color3.fromRGB(130, 130, 150)
-                else SelectedDisplay.Text = table.concat(SelectedItems, ", "); SelectedDisplay.TextColor3 = Color3.fromRGB(240, 240, 240) end
+                if #SelectedItems == 0 then
+                    SelectedDisplay.Text = "Select..."
+                    SelectedDisplay.TextColor3 = Color3.fromRGB(130, 130, 150)
+                else
+                    SelectedDisplay.Text = table.concat(SelectedItems, ", ")
+                    SelectedDisplay.TextColor3 = Color3.fromRGB(240, 240, 240)
+                end
             end
+
             local function BuildItems(items)
                 for _, v in pairs(Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
                 for i, itemStr in ipairs(items) do
                     local B = Make("TextButton", {Parent = Scroll, Size = UDim2.new(1, 0, 0, 26), BackgroundTransparency = 1, Text = "   " .. tostring(itemStr), TextColor3 = Color3.fromRGB(130, 130, 150), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = i})
+                    
                     if table.find(SelectedItems, itemStr) then B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent end
+
                     B.MouseEnter:Connect(function() Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 35, 45), BackgroundTransparency = 0}):Play() end)
                     B.MouseLeave:Connect(function() Services.TweenService:Create(B, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play() end)
+                    
                     B.MouseButton1Click:Connect(function()
                         local idx = table.find(SelectedItems, itemStr)
-                        if idx then table.remove(SelectedItems, idx); B.TextColor3 = Color3.fromRGB(130, 130, 150)
-                        else table.insert(SelectedItems, itemStr); B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent end
-                        UpdateDisplay(); Callback(SelectedItems)
+                        if idx then
+                            table.remove(SelectedItems, idx)
+                            B.TextColor3 = Color3.fromRGB(130, 130, 150)
+                        else
+                            table.insert(SelectedItems, itemStr)
+                            B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent
+                        end
+                        UpdateDisplay()
+                        Callback(SelectedItems)
                     end)
                 end
                 Scroll.CanvasSize = UDim2.new(0, 0, 0, SL.AbsoluteContentSize.Y + 10)
             end
+            
             BuildItems(Opts or {})
+            
             Head.MouseButton1Click:Connect(function()
                 IsOpen = not IsOpen
                 Services.TweenService:Create(Wrap, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = IsOpen and UDim2.new(1, -10, 0, 150) or UDim2.new(1, -10, 0, 35)}):Play()
@@ -609,6 +624,7 @@ function Quantum.Build(Config)
         end
 
         TabAPI.Container = Page
+
         return TabAPI
     end
 
