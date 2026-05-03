@@ -59,41 +59,55 @@ function Quantum.Build(Config)
     Window.ScreenGui = Make("ScreenGui", {Name = "QuantumXOpenSource", Parent = Services.CoreGui, ResetOnSpawn = false})
     Window.NotifContainer = Make("Frame", {Parent = Window.ScreenGui, Size = UDim2.new(0, 300, 1, -20), Position = UDim2.new(1, -10, 0, 0), AnchorPoint = Vector2.new(1, 0), BackgroundTransparency = 1}, { Make("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Bottom, HorizontalAlignment = Enum.HorizontalAlignment.Right, Padding = UDim.new(0, 8)}) })
     
-    Window.MainFrame = Make("CanvasGroup", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(255, 255, 255), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, 0), Size = UDim2.new(0, 400, 0, 260), Visible = false, GroupTransparency = 1, Active = true, Draggable = true}, {
+    -- ==================== [UPGRADE 1: SMOOTH OPEN/CLOSE SIZE TWEEN] ====================
+    Window.MainFrame = Make("CanvasGroup", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(255, 255, 255), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, 0), Size = UDim2.new(0, 0, 0, 0), Visible = false, GroupTransparency = 1, Active = true, Draggable = true}, {
         Make("UICorner", {CornerRadius = UDim.new(0, 10)}),
         Make("UIGradient", {Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Theme.Grad1), ColorSequenceKeypoint.new(1.00, Theme.Grad2)}, Rotation = 45})
     })
 
-    Window.ToggleBtn = Make("ImageButton", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(12, 12, 18), AnchorPoint = Vector2.new(0,0.5), Position = UDim2.new(0, 20, 0.5, 0), Size = UDim2.new(0, 40, 0, 40), Image = Config.ToggleIcon or "rbxassetid://131775361395370", Visible = false, Draggable = true}, { Make("UICorner", {CornerRadius = UDim.new(0, 12)}), Make("UIStroke", {Color = Theme.Accent}) })
+    Window.ToggleBtn = Make("ImageButton", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(12, 12, 18), AnchorPoint = Vector2.new(0,0.5), Position = UDim2.new(0, 20, 0.5, 0), Size = UDim2.new(0, 0, 0, 0), Image = Config.ToggleIcon or "rbxassetid://131775361395370", Visible = false, Draggable = true}, { Make("UICorner", {CornerRadius = UDim.new(0, 12)}), Make("UIStroke", {Color = Theme.Accent}) })
     
     local InnerFrame = Make("Frame", {Parent = Window.MainFrame, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ClipsDescendants = true}, { Make("UICorner", {CornerRadius = UDim.new(0, 10)}) })
-    Make("TextLabel", {Parent = InnerFrame, Text = Config.Title .. " | " .. Config.Subtitle, TextColor3 = Theme.Accent, Font = Enum.Font.GothamBlack, TextSize = 11, Position = UDim2.new(0, 15, 0, 10), Size = UDim2.new(0, 200, 0, 15), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+    
+    -- ==================== [UPGRADE 2: TITLE & SUBTITLE CENTER-ALIGNED] ====================
+    Make("TextLabel", {
+        Parent = InnerFrame, 
+        Text = Config.Title .. " | " .. Config.Subtitle, 
+        TextColor3 = Theme.Accent, 
+        Font = Enum.Font.GothamBlack, 
+        TextSize = 11, 
+        Position = UDim2.new(0.5, 0, 0, 10), 
+        AnchorPoint = Vector2.new(0.5, 0),
+        Size = UDim2.new(1, -60, 0, 15), 
+        BackgroundTransparency = 1, 
+        TextXAlignment = Enum.TextXAlignment.Center
+    })
 
-local CloseBtn = Make("TextButton", {
-    Parent = InnerFrame,
-    Text = "X",
-    TextColor3 = Color3.fromRGB(255, 80, 80),
-    BackgroundTransparency = 1,
-    Font = Enum.Font.GothamBold,
-    TextSize = 20,
-    Size = UDim2.new(0, 25, 0, 25),
-    Position = UDim2.new(0, 370, 0, 5)
-}, {
-    Make("UIStroke", {Color = Color3.fromRGB(255, 50, 50), Thickness = 2}),
-})
+    local CloseBtn = Make("TextButton", {
+        Parent = InnerFrame,
+        Text = "X",
+        TextColor3 = Color3.fromRGB(255, 80, 80),
+        BackgroundTransparency = 1,
+        Font = Enum.Font.GothamBold,
+        TextSize = 20,
+        Size = UDim2.new(0, 25, 0, 25),
+        Position = UDim2.new(1, -30, 0, 5)
+    }, {
+        Make("UIStroke", {Color = Color3.fromRGB(255, 50, 50), Thickness = 2}),
+    })
 
-local MinBtn = Make("TextButton", {
-    Parent = InnerFrame,
-    Text = "-",
-    TextColor3 = Color3.fromRGB(130, 130, 150),
-    BackgroundTransparency = 1,
-    Font = Enum.Font.GothamBold,
-    TextSize = 26,
-    Size = UDim2.new(0, 25, 0, 25),
-    Position = UDim2.new(0, 345, 0, 5)
-}, {
-    Make("UIStroke", {Color = Color3.fromRGB(130, 130, 150), Thickness = 2}),
-})
+    local MinBtn = Make("TextButton", {
+        Parent = InnerFrame,
+        Text = "-",
+        TextColor3 = Color3.fromRGB(130, 130, 150),
+        BackgroundTransparency = 1,
+        Font = Enum.Font.GothamBold,
+        TextSize = 26,
+        Size = UDim2.new(0, 25, 0, 25),
+        Position = UDim2.new(1, -55, 0, 5)
+    }, {
+        Make("UIStroke", {Color = Color3.fromRGB(130, 130, 150), Thickness = 2}),
+    })
 
     local Body = Make("Frame", {Parent = InnerFrame, Size = UDim2.new(1, 0, 1, -35), Position = UDim2.new(0, 0, 0, 30), BackgroundTransparency = 1})
     Window.Sidebar = Make("ScrollingFrame", {Parent = Body, BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.5, Size = UDim2.new(0, 110, 1, 0), BorderSizePixel = 0, ScrollBarThickness = 2}, { Make("UICorner", {CornerRadius = UDim.new(0, 8)}) })
@@ -101,23 +115,39 @@ local MinBtn = Make("TextButton", {
     SideList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Window.Sidebar.CanvasSize = UDim2.new(0, 0, 0, SideList.AbsoluteContentSize.Y + 30) end)
     Window.Content = Make("Frame", {Parent = Body, BackgroundTransparency = 1, Position = UDim2.new(0, 115, 0, 0), Size = UDim2.new(1, -120, 1, 0)})
 
+    -- ==================== [UPGRADE 3: SMOOTH CLOSE WITH SCALE DOWN] ====================
     CloseBtn.MouseButton1Click:Connect(function()
-        Services.TweenService:Create(Window.MainFrame, TweenInfo.new(0.3), {GroupTransparency = 1}):Play()
+        Services.TweenService:Create(Window.MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            GroupTransparency = 1,
+            Size = UDim2.new(0, 0, 0, 0)
+        }):Play()
         task.wait(0.3)
         Window.ScreenGui:Destroy()
     end)
 
+    -- ==================== [UPGRADE 4: SMOOTH MINIMIZE WITH SCALE DOWN] ====================
     MinBtn.MouseButton1Click:Connect(function()
-        Services.TweenService:Create(Window.MainFrame, TweenInfo.new(0.3), {GroupTransparency = 1}):Play()
+        Services.TweenService:Create(Window.MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            GroupTransparency = 1,
+            Size = UDim2.new(0, 0, 0, 0)
+        }):Play()
         task.wait(0.3)
         Window.MainFrame.Visible = false
         Window.ToggleBtn.Visible = true
+        -- Smooth pop-in for toggle button
+        Services.TweenService:Create(Window.ToggleBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 40, 0, 40)
+        }):Play()
     end)
 
+    -- ==================== [UPGRADE 5: SMOOTH OPEN FROM TOGGLE WITH SCALE UP] ====================
     Window.ToggleBtn.MouseButton1Click:Connect(function()
         Window.ToggleBtn.Visible = false
         Window.MainFrame.Visible = true
-        Services.TweenService:Create(Window.MainFrame, TweenInfo.new(0.4), {GroupTransparency = 0}):Play()
+        Services.TweenService:Create(Window.MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            GroupTransparency = 0,
+            Size = UDim2.new(0, 400, 0, 260)
+        }):Play()
     end)
 
     function Window:Notify(NConfig)
@@ -195,7 +225,11 @@ local MinBtn = Make("TextButton", {
 
         if IntroConfig.IsSupported then
             self.MainFrame.Visible = true
-            TS:Create(self.MainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 0}):Play()
+            -- ==================== [UPGRADE: SMOOTH INTRO OPEN] ====================
+            TS:Create(self.MainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                GroupTransparency = 0,
+                Size = UDim2.new(0, 400, 0, 260)
+            }):Play()
         else
             self.ScreenGui:Destroy()
         end
@@ -281,12 +315,33 @@ local MinBtn = Make("TextButton", {
             Tog.MouseButton1Click:Connect(function() On = not On; Tog.BackgroundColor3 = On and Quantum.ThemePalettes[Window.CurrentTheme].Accent or Color3.fromRGB(60, 60, 60); Callback(On) end)
         end
 
+        -- ==================== [UPGRADE 6: INPUT TEXT PERSISTENT + AUTO SELECT] ====================
         function TabAPI:AddInput(LabelText, Callback, Placeholder)
             TabData.Counters = TabData.Counters + 1
             local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.6, Size = UDim2.new(1, -10, 0, 28)}, { Make("UICorner", {CornerRadius = UDim.new(0, 4)}) })
             Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(240, 240, 240), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
             local Box = Make("TextBox", {Parent = Section, Size = UDim2.new(0, 70, 0, 18), Position = UDim2.new(1, -80, 0.5, -9), BackgroundColor3 = Color3.fromRGB(20, 20, 20), Text = "", PlaceholderText = Placeholder or "Set...", TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Font = Enum.Font.Gotham, TextSize = 9}, { Make("UICorner", {CornerRadius = UDim.new(0, 4)}) })
-            Box.FocusLost:Connect(function() Callback(Box.Text) end)
+            
+            -- Simpan text history biar tetap ada pas fokus ulang
+            local CurrentText = ""
+            
+            Box.Focused:Connect(function()
+                -- Text tetap ada, nggak ilang
+                Box.Text = CurrentText
+                -- Auto select all text pas klik
+                Box.CursorPosition = #Box.Text + 1
+                Box.SelectionStart = 1
+            end)
+            
+            Box.FocusLost:Connect(function()
+                CurrentText = Box.Text
+                Callback(Box.Text)
+            end)
+            
+            -- Update history pas text berubah
+            Box:GetPropertyChangedSignal("Text"):Connect(function()
+                CurrentText = Box.Text
+            end)
         end
 
         function TabAPI:AddSlider(LabelText, Callback, Opts)
