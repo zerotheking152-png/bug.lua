@@ -63,29 +63,11 @@ function Quantum.Build(Config)
         Make("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Bottom, HorizontalAlignment = Enum.HorizontalAlignment.Right, Padding = UDim.new(0, 8)}) 
     })
     
+    -- MainFrame ringan, tanpa UIStroke berat
     Window.MainFrame = Make("CanvasGroup", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(255, 255, 255), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, 0), Size = UDim2.new(0, 0, 0, 0), Visible = false, GroupTransparency = 1, Active = true, Draggable = true}, {
         Make("UICorner", {CornerRadius = UDim.new(0, 12)}),
         Make("UIGradient", {Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Theme.Grad1), ColorSequenceKeypoint.new(1.00, Theme.Grad2)}, Rotation = 45})
     })
-
-    -- ============ [CUSTOM BACKGROUND IMAGE] ============
-    local BgImage = Make("ImageLabel", {
-        Parent = Window.MainFrame,
-        Size = UDim2.new(1, 0, 1, 0),
-        Position = UDim2.new(0, 0, 0, 0),
-        BackgroundTransparency = 1,
-        Image = "rbxassetid://108320436513983",
-        ImageTransparency = 0.35,
-        ScaleType = Enum.ScaleType.Crop,
-        ZIndex = 0
-    })
-
-    -- Fungsi buat ganti background & transparansi dari luar
-    function Window:SetBackground(assetId, transparency)
-        BgImage.Image = assetId or "rbxassetid://108320436513983"
-        BgImage.ImageTransparency = transparency or 0.35
-    end
-    -- ===================================================
 
     Window.ToggleBtn = Make("ImageButton", {Parent = Window.ScreenGui, BackgroundColor3 = Color3.fromRGB(12, 12, 18), AnchorPoint = Vector2.new(0,0.5), Position = UDim2.new(0, 20, 0.5, 0), Size = UDim2.new(0, 0, 0, 0), Image = Config.ToggleIcon or "rbxassetid://131775361395370", Visible = false, Draggable = true}, { 
         Make("UICorner", {CornerRadius = UDim.new(0, 12)}), 
@@ -94,6 +76,7 @@ function Quantum.Build(Config)
     
     local InnerFrame = Make("Frame", {Parent = Window.MainFrame, Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ClipsDescendants = true})
     
+    -- Title Center
     Make("TextLabel", {
         Parent = InnerFrame, 
         Text = Config.Title .. " | " .. Config.Subtitle, 
@@ -179,8 +162,8 @@ function Quantum.Build(Config)
 
     local Body = Make("Frame", {Parent = InnerFrame, Size = UDim2.new(1, 0, 1, -36), Position = UDim2.new(0, 0, 0, 32), BackgroundTransparency = 1})
     
-    -- Sidebar transparan
-    Window.Sidebar = Make("ScrollingFrame", {Parent = Body, BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.55, Size = UDim2.new(0, 108, 1, 0), BorderSizePixel = 0, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent})
+    -- Sidebar ringan
+    Window.Sidebar = Make("ScrollingFrame", {Parent = Body, BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.3, Size = UDim2.new(0, 108, 1, 0), BorderSizePixel = 0, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent})
     local SideList = Make("UIListLayout", {Parent = Window.Sidebar, Padding = UDim.new(0, 3), HorizontalAlignment = Enum.HorizontalAlignment.Center})
     SideList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Window.Sidebar.CanvasSize = UDim2.new(0, 0, 0, SideList.AbsoluteContentSize.Y + 16) end)
     
@@ -199,7 +182,7 @@ function Quantum.Build(Config)
         end)
     end)
 
-    -- Smooth Minimize
+    -- Smooth Minimize (tanpa confirm)
     MinBtn.MouseButton1Click:Connect(function()
         Tween(Window.MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {GroupTransparency = 1, Size = UDim2.new(0, 0, 0, 0)}):Play()
         task.wait(0.3)
@@ -208,11 +191,11 @@ function Quantum.Build(Config)
         Tween(Window.ToggleBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 42, 0, 42)}):Play()
     end)
 
-    -- Smooth Open (GroupTransparency 0.15 biar sedikit transparan)
+    -- Smooth Open
     Window.ToggleBtn.MouseButton1Click:Connect(function()
         Window.ToggleBtn.Visible = false
         Window.MainFrame.Visible = true
-        Tween(Window.MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {GroupTransparency = 0.15, Size = UDim2.new(0, 400, 0, 260)}):Play()
+        Tween(Window.MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {GroupTransparency = 0, Size = UDim2.new(0, 400, 0, 260)}):Play()
     end)
 
     function Window:Notify(NConfig)
@@ -305,8 +288,7 @@ function Quantum.Build(Config)
 
         if IntroConfig.IsSupported then
             self.MainFrame.Visible = true
-            -- GroupTransparency 0.15 biar tembus pandang tipis
-            TS:Create(self.MainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {GroupTransparency = 0.15, Size = UDim2.new(0, 400, 0, 260)}):Play()
+            TS:Create(self.MainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {GroupTransparency = 0, Size = UDim2.new(0, 400, 0, 260)}):Play()
         else
             self.ScreenGui:Destroy()
         end
@@ -367,7 +349,7 @@ function Quantum.Build(Config)
 
         function TabAPI:AddVersionBox(VersionText, DateText)
             TabData.Counters = TabData.Counters + 1
-            local VerWrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.35, Size = UDim2.new(0.96, 0, 0, 44)}, { 
+            local VerWrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.2, Size = UDim2.new(0.96, 0, 0, 44)}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 6)}), 
                 Make("UIStroke", {Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Thickness = 1, Transparency = 0.5}) 
             })
@@ -378,7 +360,7 @@ function Quantum.Build(Config)
         function TabAPI:AddProfile()
             TabData.Counters = TabData.Counters + 1
             local LP = Services.Players.LocalPlayer
-            local Box = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.35, Size = UDim2.new(0.96, 0, 0, 72)}, { 
+            local Box = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.2, Size = UDim2.new(0.96, 0, 0, 72)}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 8)}),
                 Make("UIStroke", {Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Thickness = 1, Transparency = 0.5})
             })
@@ -399,7 +381,7 @@ function Quantum.Build(Config)
 
         function TabAPI:AddInfoBox(LabelText)
             TabData.Counters = TabData.Counters + 1
-            local Box = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.35, Size = UDim2.new(0.96, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y}, { 
+            local Box = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.2, Size = UDim2.new(0.96, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 6)}), 
                 Make("UIPadding", {PaddingTop = UDim.new(0, 8), PaddingBottom = UDim.new(0, 8), PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)}),
                 Make("UIStroke", {Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Thickness = 1, Transparency = 0.5})
@@ -407,9 +389,10 @@ function Quantum.Build(Config)
             Make("TextLabel", {Parent = Box, Size = UDim2.new(1, 0, 0, 0), BackgroundTransparency = 1, Text = LabelText, TextColor3 = Color3.fromRGB(220, 220, 220), Font = Enum.Font.Gotham, TextSize = 9, TextWrapped = true, AutomaticSize = Enum.AutomaticSize.Y, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top})
         end
 
+        -- Button ringan
         function TabAPI:AddButton(LabelText, Callback, Extra)
             TabData.Counters = TabData.Counters + 1
-            local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.45, Size = UDim2.new(1, -10, 0, 30)}, { 
+            local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.3, Size = UDim2.new(1, -10, 0, 30)}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)})
             })
             Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
@@ -427,9 +410,10 @@ function Quantum.Build(Config)
             Btn.MouseButton1Click:Connect(Callback)
         end
 
+        -- Toggle ringan (FIXED: pake TextButton, bukan Frame)
         function TabAPI:AddToggle(LabelText, Callback)
             TabData.Counters = TabData.Counters + 1
-            local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.45, Size = UDim2.new(1, -10, 0, 30)}, { 
+            local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.3, Size = UDim2.new(1, -10, 0, 30)}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)})
             })
             Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
@@ -442,6 +426,7 @@ function Quantum.Build(Config)
                 Make("UICorner", {CornerRadius = UDim.new(1, 0)}) 
             })
             
+            -- FIX: Pake TextButton buat klik area, bukan Frame
             local ClickArea = Make("TextButton", {Parent = Track, Size = UDim2.new(1,0,1,0), BackgroundTransparency = 1, Text = "", AutoButtonColor = false})
             
             ClickArea.MouseButton1Click:Connect(function()
@@ -453,9 +438,10 @@ function Quantum.Build(Config)
             end)
         end
 
+        -- Input ringan (FIXED: ClearTextOnFocus = false)
         function TabAPI:AddInput(LabelText, Callback, Placeholder)
             TabData.Counters = TabData.Counters + 1
-            local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.45, Size = UDim2.new(1, -10, 0, 30)}, { 
+            local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.3, Size = UDim2.new(1, -10, 0, 30)}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)})
             })
             Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
@@ -465,13 +451,13 @@ function Quantum.Build(Config)
                 Size = UDim2.new(0, 80, 0, 20), 
                 Position = UDim2.new(1, -92, 0.5, -10), 
                 BackgroundColor3 = Color3.fromRGB(25, 25, 30), 
-                BackgroundTransparency = 0.3,
+                BackgroundTransparency = 0.2,
                 Text = "", 
                 PlaceholderText = Placeholder or "Type...", 
                 TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, 
                 Font = Enum.Font.GothamBold, 
                 TextSize = 9,
-                ClearTextOnFocus = false
+                ClearTextOnFocus = false  -- FIX: Biar text gak ilang
             }, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)}),
                 Make("UIPadding", {PaddingLeft = UDim.new(0, 6), PaddingRight = UDim.new(0, 6)})
@@ -489,11 +475,12 @@ function Quantum.Build(Config)
             end)
         end
 
+        -- Slider ringan (FIXED: pake TextButton di atas, bukan Frame click)
         function TabAPI:AddSlider(LabelText, Callback, Opts)
             TabData.Counters = TabData.Counters + 1
             local Min, Max, Def = Opts.Min or 16, Opts.Max or 100, Opts.Def or 16
             
-            local Wrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.45, Size = UDim2.new(1, -10, 0, 46)}, { 
+            local Wrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.3, Size = UDim2.new(1, -10, 0, 46)}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)})
             })
             Make("TextLabel", {Parent = Wrap, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, -10), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
@@ -507,6 +494,7 @@ function Quantum.Build(Config)
                 Make("UICorner", {CornerRadius = UDim.new(1, 0)}) 
             })
             
+            -- FIX: TextButton transparan di atas slider buat klik & drag
             local SliderBtn = Make("TextButton", {Parent = SliderBg, Size = UDim2.new(1, 0, 3, 0), Position = UDim2.new(0,0,-1,0), BackgroundTransparency = 1, Text = "", AutoButtonColor = false})
             local Dragging = false
             
@@ -536,9 +524,10 @@ function Quantum.Build(Config)
             end)
         end
 
+        -- Radio ringan (FIXED: pake TextButton, animasi sederhana)
         function TabAPI:AddRadio(LabelText, Callback, Opts)
             TabData.Counters = TabData.Counters + 1
-            local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.45, Size = UDim2.new(1, -10, 0, 30)}, { 
+            local Section = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.3, Size = UDim2.new(1, -10, 0, 30)}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)})
             })
             Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
@@ -551,6 +540,7 @@ function Quantum.Build(Config)
             
             local Checks = {}
             for i, optName in ipairs(Options) do
+                -- FIX: Pake TextButton buat klik, bukan Frame
                 local RBtn = Make("TextButton", {Parent = RadioCont, Size = UDim2.new(0, 0, 1, 0), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1, Text = "", LayoutOrder = i, AutoButtonColor = false})
                 local Circle = Make("Frame", {Parent = RBtn, Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(0, 0, 0.5, -7), BackgroundColor3 = Color3.fromRGB(25, 25, 30)}, { 
                     Make("UICorner", {CornerRadius = UDim.new(1, 0)}), 
@@ -578,7 +568,7 @@ function Quantum.Build(Config)
 
         function TabAPI:AddChoice(LabelText, Callback, Opts)
             TabData.Counters = TabData.Counters + 1
-            local Wrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.45, Size = UDim2.new(1, -10, 0, 34), ClipsDescendants = true}, { 
+            local Wrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.25, Size = UDim2.new(1, -10, 0, 34), ClipsDescendants = true}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)}), 
                 Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5, Thickness = 1}) 
             })
@@ -587,7 +577,7 @@ function Quantum.Build(Config)
             local SelectedDisplay = Make("TextLabel", {Parent = Head, Text = "...", Font = Enum.Font.Gotham, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(0.5, -30, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right})
             local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(1, -22, 0.5, -6), BackgroundTransparency = 1, ImageColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent})
             local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 34), BackgroundTransparency = 1})
-            local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -14, 1, -8), Position = UDim2.new(0, 7, 0, 4), BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 0.4, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, BorderSizePixel = 0}, { 
+            local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -14, 1, -8), Position = UDim2.new(0, 7, 0, 4), BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 0.3, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, BorderSizePixel = 0}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)}), 
                 Make("UIPadding", {PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4)}) 
             })
@@ -630,7 +620,7 @@ function Quantum.Build(Config)
 
         function TabAPI:AddDropdown(LabelText, Callback, Opts)
             TabData.Counters = TabData.Counters + 1
-            local Wrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.45, Size = UDim2.new(1, -10, 0, 34), ClipsDescendants = true}, { 
+            local Wrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.25, Size = UDim2.new(1, -10, 0, 34), ClipsDescendants = true}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)}), 
                 Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5, Thickness = 1}) 
             })
@@ -639,7 +629,7 @@ function Quantum.Build(Config)
             local SelectedDisplay = Make("TextLabel", {Parent = Head, Text = "Select...", Font = Enum.Font.Gotham, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(0.5, -30, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right})
             local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(1, -22, 0.5, -6), BackgroundTransparency = 1, ImageColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent})
             local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 34), BackgroundTransparency = 1})
-            local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -14, 1, -8), Position = UDim2.new(0, 7, 0, 4), BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 0.4, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, BorderSizePixel = 0}, { 
+            local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -14, 1, -8), Position = UDim2.new(0, 7, 0, 4), BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 0.3, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, BorderSizePixel = 0}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)}), 
                 Make("UIPadding", {PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4)}) 
             })
@@ -708,7 +698,7 @@ function Quantum.Build(Config)
 
         function TabAPI:AddMultiDropdown(LabelText, Callback, Opts)
             TabData.Counters = TabData.Counters + 1
-            local Wrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.45, Size = UDim2.new(1, -10, 0, 34), ClipsDescendants = true}, { 
+            local Wrap = Make("Frame", {Parent = Page, LayoutOrder = TabData.Counters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.25, Size = UDim2.new(1, -10, 0, 34), ClipsDescendants = true}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)}), 
                 Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5, Thickness = 1}) 
             })
@@ -717,7 +707,7 @@ function Quantum.Build(Config)
             local SelectedDisplay = Make("TextLabel", {Parent = Head, Text = "Select...", Font = Enum.Font.Gotham, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(0.5, -30, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right, TextTruncate = Enum.TextTruncate.AtEnd})
             local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(1, -22, 0.5, -6), BackgroundTransparency = 1, ImageColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent})
             local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 34), BackgroundTransparency = 1})
-            local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -14, 1, -8), Position = UDim2.new(0, 7, 0, 4), BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 0.4, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, BorderSizePixel = 0}, { 
+            local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -14, 1, -8), Position = UDim2.new(0, 7, 0, 4), BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 0.3, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, BorderSizePixel = 0}, { 
                 Make("UICorner", {CornerRadius = UDim.new(0, 5)}), 
                 Make("UIPadding", {PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4)}) 
             })
