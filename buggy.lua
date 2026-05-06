@@ -114,6 +114,24 @@ function Quantum.Build(Config)
         AutoButtonColor = false
     })
 
+    -- [RESIZE BUTTON] - Tombol buat expand/collapse UI
+    local ResizeBtn = Make("TextButton", {
+        Parent = InnerFrame,
+        Text = "□",
+        TextColor3 = Color3.fromRGB(180, 180, 200),
+        BackgroundTransparency = 1,
+        Font = Enum.Font.GothamBold,
+        TextSize = 14,
+        Size = UDim2.new(0, 26, 0, 26),
+        Position = UDim2.new(1, -86, 0, 6),
+        AutoButtonColor = false
+    })
+
+    -- State resize UI
+    local IsExpanded = false
+    local NormalSize = UDim2.new(0, 400, 0, 260)
+    local ExpandedSize = UDim2.new(0, 520, 0, 340)
+
     -- ==================== [CONFIRMATION DIALOG] ====================
     local ConfirmGui = Make("ScreenGui", {Parent = Services.CoreGui, ResetOnSpawn = false, Name = "QuantumConfirm", Enabled = false})
     local ConfirmBlur = Make("BlurEffect", {Parent = Services.Lighting, Size = 0, Enabled = false})
@@ -189,6 +207,29 @@ function Quantum.Build(Config)
         Window.MainFrame.Visible = false
         Window.ToggleBtn.Visible = true
         Tween(Window.ToggleBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 42, 0, 42)}):Play()
+    end)
+
+    -- Smooth Resize (Expand/Collapse dengan animasi)
+    ResizeBtn.MouseButton1Click:Connect(function()
+        IsExpanded = not IsExpanded
+        local TargetSize = IsExpanded and ExpandedSize or NormalSize
+
+        -- Animasi membesar/mengecil
+        Tween(Window.MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = TargetSize}):Play()
+
+        -- Update icon
+        ResizeBtn.Text = IsExpanded and "▣" or "□"
+    end)
+
+    -- Hover effect untuk ResizeBtn (animasi membesar sedikit)
+    ResizeBtn.MouseEnter:Connect(function()
+        Tween(ResizeBtn, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 30, 0, 30), TextSize = 16}):Play()
+        ResizeBtn.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent
+    end)
+
+    ResizeBtn.MouseLeave:Connect(function()
+        Tween(ResizeBtn, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 26, 0, 26), TextSize = 14}):Play()
+        ResizeBtn.TextColor3 = Color3.fromRGB(180, 180, 200)
     end)
 
     -- Smooth Open
