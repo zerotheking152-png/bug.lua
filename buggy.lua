@@ -106,11 +106,17 @@ function Quantum:ApplyTheme(Window, themeName)
         end
     end
 
+    -- Update Sidebar scrollbar color
+    if Window.Sidebar then
+        Quantum:AnimateColor(Window.Sidebar, "ScrollBarImageColor3", Theme.Accent, 0.3)
+    end
+
     for _, tab in pairs(Window.Tabs) do
         if tab.Ico.TextColor3 ~= Color3.fromRGB(130, 130, 150) then
             Quantum:AnimateColor(tab.Ico, "TextColor3", Theme.Accent, 0.3)
         end
         Quantum:AnimateColor(tab.Ind, "BackgroundColor3", Theme.Accent, 0.3)
+        Quantum:AnimateColor(tab.Page, "ScrollBarImageColor3", Theme.Accent, 0.3)
     end
 
     -- Animate Theme Dropdown UI elements
@@ -150,6 +156,17 @@ function Quantum:ApplyTheme(Window, themeName)
                    and bc ~= Color3.fromRGB(50,50,60) then
                     local parent = elem.Parent
                     if parent and (parent:FindFirstChildOfClass("UICorner") or parent.Name:find("Slider") or parent.Name:find("Progress")) then
+                        Quantum:AnimateColor(elem, "BackgroundColor3", Theme.Accent, 0.3)
+                    end
+                end
+            end
+            -- Fix: Update AddButton buttons (TextButton with UICorner and black text)
+            if elem:IsA("TextButton") then
+                local bc = elem.BackgroundColor3
+                if bc ~= Color3.fromRGB(15,15,20) and bc ~= Color3.fromRGB(25,25,30)
+                   and bc ~= Color3.fromRGB(35,35,45) and bc ~= Color3.fromRGB(45,45,55)
+                   and bc ~= Color3.fromRGB(255,255,255) and bc ~= Color3.fromRGB(0,0,0) then
+                    if elem:FindFirstChildOfClass("UICorner") and elem.TextColor3 == Color3.new(0,0,0) then
                         Quantum:AnimateColor(elem, "BackgroundColor3", Theme.Accent, 0.3)
                     end
                 end
@@ -401,6 +418,7 @@ function Quantum.Build(Config)
             Page.Visible = true
             Indicator.Size = UDim2.new(0, 3, 0, 16)
             Indicator.BackgroundTransparency = 0
+            Indicator.BackgroundColor3 = Quantum.ThemePalettes[self.CurrentTheme].Accent
             Btn.BackgroundTransparency = 0.9
             Btn.BackgroundColor3 = Color3.fromRGB(255,255,255)
         end)
@@ -412,6 +430,7 @@ function Quantum.Build(Config)
             Page.Visible = true
             Indicator.Size = UDim2.new(0, 3, 0, 16)
             Indicator.BackgroundTransparency = 0
+            Indicator.BackgroundColor3 = Quantum.ThemePalettes[self.CurrentTheme].Accent
             Btn.BackgroundTransparency = 0.9
             Btn.BackgroundColor3 = Color3.fromRGB(255,255,255)
         end
