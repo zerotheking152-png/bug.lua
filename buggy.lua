@@ -113,14 +113,19 @@ function Quantum:ApplyTheme(Window, themeName)
         Quantum:AnimateColor(tab.Ind, "BackgroundColor3", Theme.Accent, 0.3)
     end
 
-    if Window.ThemeDropdown then
-        local arrow = Window.ThemeDropdown:FindFirstChild("Arrow", true)
+    -- Animate Theme Changer UI elements
+    if Window.ThemeChanger then
+        local arrow = Window.ThemeChanger:FindFirstChild("Arrow", true)
         if arrow then
             Quantum:AnimateColor(arrow, "ImageColor3", Theme.Accent, 0.3)
         end
-        local stroke = Window.ThemeDropdown:FindFirstChildOfClass("UIStroke")
+        local stroke = Window.ThemeChanger:FindFirstChildOfClass("UIStroke")
         if stroke then
             Quantum:AnimateColor(stroke, "Color", Theme.Accent, 0.3)
+        end
+        local headText = Window.ThemeChanger:FindFirstChild("HeadText", true)
+        if headText then
+            Quantum:AnimateColor(headText, "TextColor3", Theme.Accent, 0.3)
         end
     end
 
@@ -204,53 +209,131 @@ function Quantum.Build(Config)
     local MinBtn = Make("TextButton", {Parent = InnerFrame, Text = "-", TextColor3 = Color3.fromRGB(180, 180, 200), BackgroundTransparency = 1, Font = Enum.Font.GothamBold, TextSize = 22, Size = UDim2.new(0, 26, 0, 26), Position = UDim2.new(1, -58, 0, 6), AutoButtonColor = false})
     local ResizeBtn = Make("TextButton", {Parent = InnerFrame, Text = "□", TextColor3 = Color3.fromRGB(180, 180, 200), BackgroundTransparency = 1, Font = Enum.Font.GothamBold, TextSize = 14, Size = UDim2.new(0, 26, 0, 26), Position = UDim2.new(1, -86, 0, 6), AutoButtonColor = false})
 
-    -- THEME SWITCHER (POJOK KIRI ATAS)
-    local ThemeSwitcherWrap = Make("Frame", {
-        Parent = InnerFrame, Name = "ThemeSwitcher",
+    -- ============================================================
+    -- THEME CHANGER (POJOK KANAN BAWAH - EXPAND KE KIRI)
+    -- ============================================================
+    local ThemeChangerWrap = Make("Frame", {
+        Parent = InnerFrame, Name = "ThemeChanger",
         BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.25,
-        Size = UDim2.new(0, 140, 0, 30), Position = UDim2.new(0, 8, 0, 4),
+        Size = UDim2.new(0, 110, 0, 32), 
+        Position = UDim2.new(1, -118, 1, -40),
+        AnchorPoint = Vector2.new(0, 0),
         ClipsDescendants = true
     }, {
         Make("UICorner", {CornerRadius = UDim.new(0, 6)}),
         Make("UIStroke", {Color = Theme.Accent, Thickness = 1, Transparency = 0.5})
     })
 
-    local ThemeHead = Make("TextButton", {Parent = ThemeSwitcherWrap, Name = "Head", Size = UDim2.new(1, 0, 0, 30), BackgroundTransparency = 1, Text = "", AutoButtonColor = false})
-    Make("TextLabel", {Parent = ThemeHead, Text = "Theme", Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0.4, 0, 1, 0), Position = UDim2.new(0, 8, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
-    local ThemeSelected = Make("TextLabel", {Parent = ThemeHead, Name = "SelectedDisplay", Text = Window.CurrentTheme, Font = Enum.Font.Gotham, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(0.5, -20, 1, 0), Position = UDim2.new(0.4, 0, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right})
-    local ThemeArrow = Make("ImageLabel", {Parent = ThemeHead, Name = "Arrow", Image = "rbxassetid://6031091004", Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(1, -18, 0.5, -6), BackgroundTransparency = 1, ImageColor3 = Theme.Accent})
+    -- Head button (clickable area) - positioned at the RIGHT side
+    local ThemeHead = Make("TextButton", {
+        Parent = ThemeChangerWrap, Name = "Head", 
+        Size = UDim2.new(0, 110, 0, 32), 
+        Position = UDim2.new(1, -110, 0, 0),
+        BackgroundTransparency = 1, 
+        Text = "", 
+        AutoButtonColor = false
+    })
 
-    local ThemeContent = Make("Frame", {Parent = ThemeSwitcherWrap, Size = UDim2.new(1, 0, 0, 140), Position = UDim2.new(0, 0, 0, 30), BackgroundTransparency = 1})
-    local ThemeScroll = Make("ScrollingFrame", {Parent = ThemeContent, Size = UDim2.new(1, -10, 1, -6), Position = UDim2.new(0, 5, 0, 3), BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 0.3, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, BorderSizePixel = 0}, {
+    -- Arrow icon (shows > when closed, < when open)
+    local ThemeArrow = Make("ImageLabel", {
+        Parent = ThemeHead, Name = "Arrow", 
+        Image = "rbxassetid://6031091004", 
+        Size = UDim2.new(0, 12, 0, 12), 
+        Position = UDim2.new(0, 8, 0.5, -6), 
+        BackgroundTransparency = 1, 
+        ImageColor3 = Theme.Accent,
+        Rotation = 270
+    })
+
+    -- "Theme Changer" text
+    local ThemeHeadText = Make("TextLabel", {
+        Parent = ThemeHead, Name = "HeadText",
+        Text = "Theme Changer", 
+        Font = Enum.Font.GothamBold, 
+        TextSize = 9, 
+        TextColor3 = Theme.Accent, 
+        Size = UDim2.new(0, 80, 1, 0), 
+        Position = UDim2.new(0, 24, 0, 0), 
+        BackgroundTransparency = 1, 
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+
+    -- Content container (hidden initially, expands to the left)
+    local ThemeContent = Make("Frame", {
+        Parent = ThemeChangerWrap, 
+        Size = UDim2.new(0, 140, 0, 32), 
+        Position = UDim2.new(1, -250, 0, 0),
+        BackgroundTransparency = 1
+    })
+
+    local ThemeScroll = Make("ScrollingFrame", {
+        Parent = ThemeContent, 
+        Size = UDim2.new(1, -10, 1, -6), 
+        Position = UDim2.new(0, 5, 0, 3), 
+        BackgroundColor3 = Color3.fromRGB(22, 22, 28), 
+        BackgroundTransparency = 0.3, 
+        ScrollBarThickness = 2, 
+        ScrollBarImageColor3 = Theme.Accent, 
+        BorderSizePixel = 0
+    }, {
         Make("UICorner", {CornerRadius = UDim.new(0, 5)}),
         Make("UIPadding", {PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4)})
     })
-    local ThemeListLayout = Make("UIListLayout", {Parent = ThemeScroll, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 2)})
 
-    Window.ThemeDropdown = ThemeSwitcherWrap
+    local ThemeListLayout = Make("UIListLayout", {
+        Parent = ThemeScroll, 
+        SortOrder = Enum.SortOrder.LayoutOrder, 
+        Padding = UDim.new(0, 2)
+    })
+
+    Window.ThemeChanger = ThemeChangerWrap
     local ThemeIsOpen = false
 
     local function BuildThemeList()
-        for _, v in pairs(ThemeScroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+        for _, v in pairs(ThemeScroll:GetChildren()) do 
+            if v:IsA("TextButton") then v:Destroy() end 
+        end
         for i, themeName in ipairs(Quantum.SwitcherThemes) do
             local palette = Quantum.ThemePalettes[themeName]
             local B = Make("TextButton", {
-                Parent = ThemeScroll, Size = UDim2.new(1, 0, 0, 26), BackgroundTransparency = 1,
+                Parent = ThemeScroll, 
+                Size = UDim2.new(1, 0, 0, 26), 
+                BackgroundTransparency = 1,
                 Text = "   " .. themeName,
                 TextColor3 = (themeName == Window.CurrentTheme) and palette.Accent or Color3.fromRGB(150, 150, 160),
-                Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left,
-                LayoutOrder = i, AutoButtonColor = false
+                Font = Enum.Font.Gotham, 
+                TextSize = 9, 
+                TextXAlignment = Enum.TextXAlignment.Left,
+                LayoutOrder = i, 
+                AutoButtonColor = false
             })
-            local Dot = Make("Frame", {Parent = B, Size = UDim2.new(0, 8, 0, 8), Position = UDim2.new(0, 120, 0.5, -4), BackgroundColor3 = palette.Accent, BorderSizePixel = 0}, {Make("UICorner", {CornerRadius = UDim.new(1, 0)})})
+            local Dot = Make("Frame", {
+                Parent = B, 
+                Size = UDim2.new(0, 8, 0, 8), 
+                Position = UDim2.new(0, 120, 0.5, -4), 
+                BackgroundColor3 = palette.Accent, 
+                BorderSizePixel = 0
+            }, {Make("UICorner", {CornerRadius = UDim.new(1, 0)})})
 
-            B.MouseEnter:Connect(function() B.BackgroundColor3 = Color3.fromRGB(45, 45, 55); B.BackgroundTransparency = 0.3 end)
-            B.MouseLeave:Connect(function() B.BackgroundTransparency = 1 end)
+            B.MouseEnter:Connect(function() 
+                B.BackgroundColor3 = Color3.fromRGB(45, 45, 55); 
+                B.BackgroundTransparency = 0.3 
+            end)
+            B.MouseLeave:Connect(function() 
+                B.BackgroundTransparency = 1 
+            end)
             B.MouseButton1Click:Connect(function()
                 ThemeIsOpen = false
-                Tween(ThemeSwitcherWrap, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 140, 0, 30)}):Play()
-                Tween(ThemeArrow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 0}):Play()
-                ThemeSelected.Text = themeName
-                ThemeSelected.TextColor3 = Color3.fromRGB(240, 240, 240)
+                -- Collapse animation
+                Tween(ThemeChangerWrap, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+                    Size = UDim2.new(0, 110, 0, 32),
+                    Position = UDim2.new(1, -118, 1, -40)
+                }):Play()
+                -- Rotate arrow back to >
+                Tween(ThemeArrow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 270}):Play()
+                -- Update text back
+                ThemeHeadText.Text = "Theme Changer"
+
                 Quantum:ApplyTheme(Window, themeName)
                 task.delay(0.3, BuildThemeList)
             end)
@@ -264,11 +347,25 @@ function Quantum.Build(Config)
         ThemeIsOpen = not ThemeIsOpen
         if ThemeIsOpen then
             BuildThemeList()
-            Tween(ThemeSwitcherWrap, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 140, 0, 170)}):Play()
-            Tween(ThemeArrow, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Rotation = 180}):Play()
+            -- Expand to the LEFT (wider, same position anchor)
+            Tween(ThemeChangerWrap, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, 250, 0, 32),
+                Position = UDim2.new(1, -258, 1, -40)
+            }):Play()
+            -- Rotate arrow to point left (<)
+            Tween(ThemeArrow, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Rotation = 90}):Play()
+            -- Change text
+            ThemeHeadText.Text = "Close"
         else
-            Tween(ThemeSwitcherWrap, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(0, 140, 0, 30)}):Play()
-            Tween(ThemeArrow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 0}):Play()
+            -- Collapse back
+            Tween(ThemeChangerWrap, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+                Size = UDim2.new(0, 110, 0, 32),
+                Position = UDim2.new(1, -118, 1, -40)
+            }):Play()
+            -- Rotate arrow back to point right (>)
+            Tween(ThemeArrow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 270}):Play()
+            -- Change text back
+            ThemeHeadText.Text = "Theme Changer"
         end
     end)
 
