@@ -895,6 +895,371 @@ function Quantum.Build(Config)
             end)
         end
 
+
+    -- ============================================================
+    -- SECTION (Accordion / Collapsible)
+    -- ============================================================
+    function TabAPI:AddSection(Title)
+        TabData.Counters = TabData.Counters + 1
+        local SectionWrap = Make("Frame", {
+            Parent = Page,
+            LayoutOrder = TabData.Counters,
+            BackgroundColor3 = Color3.fromRGB(15, 15, 20),
+            BackgroundTransparency = 0.25,
+            Size = UDim2.new(1, -10, 0, 34),
+            ClipsDescendants = true
+        }, {
+            Make("UICorner", {CornerRadius = UDim.new(0, 5)}),
+            Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5, Thickness = 1})
+        })
+
+        local Header = Make("TextButton", {
+            Parent = SectionWrap,
+            Size = UDim2.new(1, 0, 0, 34),
+            BackgroundTransparency = 1,
+            Text = "",
+            AutoButtonColor = false
+        })
+
+        Make("TextLabel", {
+            Parent = Header,
+            Text = Title,
+            Font = Enum.Font.GothamBold,
+            TextSize = 9,
+            TextColor3 = Color3.fromRGB(230, 230, 230),
+            Size = UDim2.new(1, -40, 1, 0),
+            Position = UDim2.new(0, 10, 0, 0),
+            BackgroundTransparency = 1,
+            TextXAlignment = Enum.TextXAlignment.Left
+        })
+
+        local Arrow = Make("ImageLabel", {
+            Parent = Header,
+            Image = "rbxassetid://6031091004",
+            Size = UDim2.new(0, 12, 0, 12),
+            Position = UDim2.new(1, -22, 0.5, -6),
+            BackgroundTransparency = 1,
+            ImageColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent,
+            Rotation = 0
+        })
+
+        local Content = Make("Frame", {
+            Parent = SectionWrap,
+            Size = UDim2.new(1, 0, 1, -34),
+            Position = UDim2.new(0, 0, 0, 34),
+            BackgroundTransparency = 1
+        })
+
+        local ContentList = Make("UIListLayout", {
+            Parent = Content,
+            Padding = UDim.new(0, 5),
+            SortOrder = Enum.SortOrder.LayoutOrder
+        })
+
+        local IsOpen = false
+        local SectionCounters = 0
+
+        local function UpdateSize()
+            if IsOpen then
+                local h = ContentList.AbsoluteContentSize.Y + 10
+                Tween(SectionWrap, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                    Size = UDim2.new(1, -10, 0, 34 + h)
+                }):Play()
+            else
+                Tween(SectionWrap, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                    Size = UDim2.new(1, -10, 0, 34)
+                }):Play()
+            end
+        end
+
+        ContentList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdateSize)
+
+        Header.MouseButton1Click:Connect(function()
+            IsOpen = not IsOpen
+            UpdateSize()
+            Tween(Arrow, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Rotation = IsOpen and 180 or 0}):Play()
+        end)
+
+        local SectionAPI = {}
+
+        function SectionAPI:AddLabel(LabelText)
+            SectionCounters = SectionCounters + 1
+            return Make("TextLabel", {Parent = Content, Size = UDim2.new(1, -10, 0, 16), BackgroundTransparency = 1, Text = LabelText, TextColor3 = Color3.fromRGB(160, 160, 170), Font = Enum.Font.GothamBold, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = SectionCounters})
+        end
+
+        function SectionAPI:AddInfoBox(LabelText)
+            SectionCounters = SectionCounters + 1
+            local Box = Make("Frame", {Parent = Content, LayoutOrder = SectionCounters, BackgroundColor3 = Color3.fromRGB(20, 25, 35), BackgroundTransparency = 0.2, Size = UDim2.new(0.96, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y}, {
+                Make("UICorner", {CornerRadius = UDim.new(0, 6)}),
+                Make("UIPadding", {PaddingTop = UDim.new(0, 8), PaddingBottom = UDim.new(0, 8), PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8)}),
+                Make("UIStroke", {Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Thickness = 1, Transparency = 0.5})
+            })
+            Make("TextLabel", {Parent = Box, Size = UDim2.new(1, 0, 0, 0), BackgroundTransparency = 1, Text = LabelText, TextColor3 = Color3.fromRGB(220, 220, 220), Font = Enum.Font.Gotham, TextSize = 9, TextWrapped = true, AutomaticSize = Enum.AutomaticSize.Y, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top})
+        end
+
+        function SectionAPI:AddButton(LabelText, Callback, Extra)
+            SectionCounters = SectionCounters + 1
+            local Section = Make("Frame", {Parent = Content, LayoutOrder = SectionCounters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.3, Size = UDim2.new(1, -10, 0, 30)}, { Make("UICorner", {CornerRadius = UDim.new(0, 5)}) })
+            Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+            local Btn = Make("TextButton", {Parent = Section, Size = UDim2.new(0, 76, 0, 20), Position = UDim2.new(1, -88, 0.5, -10), BackgroundColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Text = Extra or "Click", TextColor3 = Color3.new(0, 0, 0), Font = Enum.Font.GothamBold, TextSize = 9, AutoButtonColor = false}, { Make("UICorner", {CornerRadius = UDim.new(0, 5)}) })
+            Btn.MouseEnter:Connect(function() Btn.BackgroundColor3 = Color3.fromRGB(255,255,255) end)
+            Btn.MouseLeave:Connect(function() Btn.BackgroundColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent end)
+            Btn.MouseButton1Click:Connect(Callback)
+        end
+
+        function SectionAPI:AddToggle(LabelText, Callback)
+            SectionCounters = SectionCounters + 1
+            local Section = Make("Frame", {Parent = Content, LayoutOrder = SectionCounters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.3, Size = UDim2.new(1, -10, 0, 30)}, { Make("UICorner", {CornerRadius = UDim.new(0, 5)}) })
+            Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+            local On = false
+            local Track = Make("Frame", {Parent = Section, Size = UDim2.new(0, 34, 0, 16), Position = UDim2.new(1, -42, 0.5, -8), BackgroundColor3 = Color3.fromRGB(45, 45, 55)}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
+            local Knob = Make("Frame", {Parent = Track, Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(0, 2, 0.5, -6), BackgroundColor3 = Color3.fromRGB(180, 180, 190)}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
+            local ClickArea = Make("TextButton", {Parent = Track, Size = UDim2.new(1,0,1,0), BackgroundTransparency = 1, Text = "", AutoButtonColor = false})
+            ClickArea.MouseButton1Click:Connect(function()
+                On = not On
+                Track.BackgroundColor3 = On and Quantum.ThemePalettes[Window.CurrentTheme].Accent or Color3.fromRGB(45, 45, 55)
+                Knob.BackgroundColor3 = On and Color3.fromRGB(255,255,255) or Color3.fromRGB(180, 180, 190)
+                Knob.Position = On and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
+                Callback(On)
+            end)
+        end
+
+        function SectionAPI:AddInput(LabelText, Callback, Placeholder)
+            SectionCounters = SectionCounters + 1
+            local Section = Make("Frame", {Parent = Content, LayoutOrder = SectionCounters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.3, Size = UDim2.new(1, -10, 0, 30)}, { Make("UICorner", {CornerRadius = UDim.new(0, 5)}) })
+            Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+            local Box = Make("TextBox", {
+                Parent = Section, Size = UDim2.new(0, 80, 0, 20), Position = UDim2.new(1, -92, 0.5, -10),
+                BackgroundColor3 = Color3.fromRGB(25, 25, 30), BackgroundTransparency = 0.2,
+                Text = "", PlaceholderText = Placeholder or "Type...",
+                TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent,
+                Font = Enum.Font.GothamBold, TextSize = 9, ClearTextOnFocus = false
+            }, { Make("UICorner", {CornerRadius = UDim.new(0, 5)}), Make("UIPadding", {PaddingLeft = UDim.new(0, 6), PaddingRight = UDim.new(0, 6)}) })
+            Box.Focused:Connect(function() Box.BackgroundColor3 = Color3.fromRGB(35, 35, 45); Box.SelectionStart = 1; Box.CursorPosition = #Box.Text + 1 end)
+            Box.FocusLost:Connect(function() Box.BackgroundColor3 = Color3.fromRGB(25, 25, 30); Callback(Box.Text) end)
+        end
+
+        function SectionAPI:AddSlider(LabelText, Callback, Opts)
+            SectionCounters = SectionCounters + 1
+            local Min, Max, Def = Opts.Min or 16, Opts.Max or 100, Opts.Def or 16
+            local Wrap = Make("Frame", {Parent = Content, LayoutOrder = SectionCounters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.3, Size = UDim2.new(1, -10, 0, 46)}, { Make("UICorner", {CornerRadius = UDim.new(0, 5)}) })
+            Make("TextLabel", {Parent = Wrap, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, -10), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+            local ValL = Make("TextLabel", {Parent = Wrap, Text = tostring(Def), Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Size = UDim2.new(0, 50, 0, 18), Position = UDim2.new(1, -56, 0, 2), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right})
+            local SliderBg = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, -20, 0, 5), Position = UDim2.new(0, 10, 0, 28), BackgroundColor3 = Color3.fromRGB(40, 40, 50)}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
+            local SliderFill = Make("Frame", {Parent = SliderBg, Size = UDim2.new((Def - Min) / (Max - Min), 0, 1, 0), BackgroundColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}) })
+            local SliderBtn = Make("TextButton", {Parent = SliderBg, Size = UDim2.new(1, 0, 3, 0), Position = UDim2.new(0,0,-1,0), BackgroundTransparency = 1, Text = "", AutoButtonColor = false})
+            local Dragging = false
+            local function UpdateSlider(input)
+                local pos = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
+                SliderFill.Size = UDim2.new(pos, 0, 1, 0)
+                local value = math.floor(Min + ((Max - Min) * pos))
+                ValL.Text = tostring(value)
+                Callback(value)
+            end
+            SliderBtn.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then Dragging = true; UpdateSlider(input) end end)
+            Services.UserInputService.InputEnded:Connect(function(input) if Dragging and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then Dragging = false end end)
+            Services.UserInputService.InputChanged:Connect(function(input) if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateSlider(input) end end)
+        end
+
+        function SectionAPI:AddChoice(LabelText, Callback, Opts)
+            SectionCounters = SectionCounters + 1
+            local Wrap = Make("Frame", {Parent = Content, LayoutOrder = SectionCounters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.25, Size = UDim2.new(1, -10, 0, 34), ClipsDescendants = true}, {
+                Make("UICorner", {CornerRadius = UDim.new(0, 5)}), Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5, Thickness = 1})
+            })
+            local Head = Make("TextButton", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 34), BackgroundTransparency = 1, Text = "", AutoButtonColor = false})
+            Make("TextLabel", {Parent = Head, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0.5, 0, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+            local SelectedDisplay = Make("TextLabel", {Parent = Head, Text = "...", Font = Enum.Font.Gotham, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(0.5, -30, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right})
+            local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(1, -22, 0.5, -6), BackgroundTransparency = 1, ImageColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent})
+            local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 34), BackgroundTransparency = 1})
+            local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -14, 1, -8), Position = UDim2.new(0, 7, 0, 4), BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 0.3, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, BorderSizePixel = 0}, {
+                Make("UICorner", {CornerRadius = UDim.new(0, 5)}), Make("UIPadding", {PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4)})
+            })
+            local SL = Make("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 2)})
+            local IsOpen = false
+
+            local function BuildList(ItemsList)
+                for _, v in pairs(Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+                local validItems = ItemsList or {}
+                if #validItems == 0 then validItems = {"[Kosong]"} end
+                for i, opt in ipairs(validItems) do
+                    local B = Make("TextButton", {Parent = Scroll, Size = UDim2.new(1, 0, 0, 26), BackgroundTransparency = 1, Text = "   " .. tostring(opt), TextColor3 = Color3.fromRGB(150, 150, 160), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = i, AutoButtonColor = false})
+                    B.MouseEnter:Connect(function() B.BackgroundColor3 = Color3.fromRGB(45, 45, 55); B.BackgroundTransparency = 0.3 end)
+                    B.MouseLeave:Connect(function() B.BackgroundTransparency = 1 end)
+                    B.MouseButton1Click:Connect(function()
+                        if opt ~= "[Kosong]" then SelectedDisplay.Text = tostring(opt); SelectedDisplay.TextColor3 = Color3.fromRGB(240, 240, 240); Callback(opt) end
+                        IsOpen = false
+                        Tween(Wrap, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, 34)}):Play()
+                        Tween(Arrow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 0}):Play()
+                    end)
+                end
+                Scroll.CanvasSize = UDim2.new(0,0,0,SL.AbsoluteContentSize.Y + 8)
+            end
+
+            Head.MouseButton1Click:Connect(function()
+                IsOpen = not IsOpen
+                if IsOpen then
+                    if type(Opts) == "function" then BuildList(Opts()) else BuildList(Opts) end
+                    Tween(Wrap, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, 148)}):Play()
+                    Tween(Arrow, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Rotation = 180}):Play()
+                else
+                    Tween(Wrap, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, 34)}):Play()
+                    Tween(Arrow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 0}):Play()
+                end
+            end)
+            if type(Opts) ~= "function" then BuildList(Opts) end
+        end
+
+        function SectionAPI:AddDropdown(LabelText, Callback, Opts)
+            SectionCounters = SectionCounters + 1
+            local Wrap = Make("Frame", {Parent = Content, LayoutOrder = SectionCounters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.25, Size = UDim2.new(1, -10, 0, 34), ClipsDescendants = true}, {
+                Make("UICorner", {CornerRadius = UDim.new(0, 5)}), Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5, Thickness = 1})
+            })
+            local Head = Make("TextButton", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 34), BackgroundTransparency = 1, Text = "", AutoButtonColor = false})
+            Make("TextLabel", {Parent = Head, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0.5, 0, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+            local SelectedDisplay = Make("TextLabel", {Parent = Head, Text = "Select...", Font = Enum.Font.Gotham, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(0.5, -30, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right})
+            local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(1, -22, 0.5, -6), BackgroundTransparency = 1, ImageColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent})
+            local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 34), BackgroundTransparency = 1})
+            local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -14, 1, -8), Position = UDim2.new(0, 7, 0, 4), BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 0.3, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, BorderSizePixel = 0}, {
+                Make("UICorner", {CornerRadius = UDim.new(0, 5)}), Make("UIPadding", {PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4)})
+            })
+            local SL = Make("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 2)})
+            local IsOpen = false
+            local PendingBtn = nil
+            local PendingItemName = nil
+
+            local function ResetPending()
+                if PendingBtn and PendingBtn.Parent then
+                    PendingBtn.Text = "   " .. tostring(PendingItemName)
+                    PendingBtn.TextColor3 = Color3.fromRGB(150, 150, 160)
+                    PendingBtn.BackgroundTransparency = 1
+                end
+                PendingBtn = nil; PendingItemName = nil
+            end
+
+            local function BuildItems(items)
+                ResetPending()
+                for _, v in pairs(Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+                for i, item in ipairs(items) do
+                    local B = Make("TextButton", {Parent = Scroll, Size = UDim2.new(1, 0, 0, 26), BackgroundTransparency = 1, Text = "   " .. item.Name, TextColor3 = Color3.fromRGB(150, 150, 160), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = i, AutoButtonColor = false})
+                    B.MouseEnter:Connect(function() if PendingBtn ~= B then B.BackgroundColor3 = Color3.fromRGB(45, 45, 55); B.BackgroundTransparency = 0.3 end end)
+                    B.MouseLeave:Connect(function() if PendingBtn ~= B then B.BackgroundTransparency = 1 end end)
+                    B.MouseButton1Click:Connect(function()
+                        if PendingBtn == B then
+                            SelectedDisplay.Text = item.Name; SelectedDisplay.TextColor3 = Color3.fromRGB(240, 240, 240)
+                            ResetPending(); Callback(item.Pos)
+                            IsOpen = false
+                            Tween(Wrap, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, 34)}):Play()
+                            Tween(Arrow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 0}):Play()
+                        else
+                            ResetPending(); PendingBtn = B; PendingItemName = item.Name
+                            B.Text = "   [ Tap again to teleport ]"
+                            B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent
+                            B.BackgroundColor3 = Color3.fromRGB(50, 50, 60); B.BackgroundTransparency = 0.2
+                        end
+                    end)
+                end
+                Scroll.CanvasSize = UDim2.new(0, 0, 0, SL.AbsoluteContentSize.Y + 8)
+            end
+
+            BuildItems(Opts)
+
+            Head.MouseButton1Click:Connect(function()
+                IsOpen = not IsOpen
+                if IsOpen and LabelText == "Teleport to Player" then
+                    local pList = {}
+                    for _, p in pairs(Services.Players:GetPlayers()) do if p ~= Services.Players.LocalPlayer then table.insert(pList, {Name = p.DisplayName .. " (@" .. p.Name .. ")", Pos = p}) end end
+                    BuildItems(pList)
+                end
+                if not IsOpen then ResetPending() end
+                if IsOpen then
+                    Tween(Wrap, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, 148)}):Play()
+                    Tween(Arrow, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Rotation = 180}):Play()
+                else
+                    Tween(Wrap, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, 34)}):Play()
+                    Tween(Arrow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 0}):Play()
+                end
+            end)
+        end
+
+        function SectionAPI:AddMultiDropdown(LabelText, Callback, Opts)
+            SectionCounters = SectionCounters + 1
+            local Wrap = Make("Frame", {Parent = Content, LayoutOrder = SectionCounters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.25, Size = UDim2.new(1, -10, 0, 34), ClipsDescendants = true}, {
+                Make("UICorner", {CornerRadius = UDim.new(0, 5)}), Make("UIStroke", {Color = Color3.fromRGB(40, 40, 50), Transparency = 0.5, Thickness = 1})
+            })
+            local Head = Make("TextButton", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 34), BackgroundTransparency = 1, Text = "", AutoButtonColor = false})
+            Make("TextLabel", {Parent = Head, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0.5, 0, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+            local SelectedDisplay = Make("TextLabel", {Parent = Head, Text = "Select...", Font = Enum.Font.Gotham, TextSize = 9, TextColor3 = Color3.fromRGB(130, 130, 150), Size = UDim2.new(0.5, -30, 1, 0), Position = UDim2.new(0.5, 0, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Right, TextTruncate = Enum.TextTruncate.AtEnd})
+            local Arrow = Make("ImageLabel", {Parent = Head, Image = "rbxassetid://6031091004", Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(1, -22, 0.5, -6), BackgroundTransparency = 1, ImageColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent})
+            local ContentCont = Make("Frame", {Parent = Wrap, Size = UDim2.new(1, 0, 0, 110), Position = UDim2.new(0, 0, 0, 34), BackgroundTransparency = 1})
+            local Scroll = Make("ScrollingFrame", {Parent = ContentCont, Size = UDim2.new(1, -14, 1, -8), Position = UDim2.new(0, 7, 0, 4), BackgroundColor3 = Color3.fromRGB(22, 22, 28), BackgroundTransparency = 0.3, ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, BorderSizePixel = 0}, {
+                Make("UICorner", {CornerRadius = UDim.new(0, 5)}), Make("UIPadding", {PaddingTop = UDim.new(0, 4), PaddingBottom = UDim.new(0, 4)})
+            })
+            local SL = Make("UIListLayout", {Parent = Scroll, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 2)})
+            local IsOpen = false
+            local SelectedItems = {}
+
+            local function UpdateDisplay()
+                if #SelectedItems == 0 then SelectedDisplay.Text = "Select..."; SelectedDisplay.TextColor3 = Color3.fromRGB(130, 130, 150)
+                else SelectedDisplay.Text = table.concat(SelectedItems, ", "); SelectedDisplay.TextColor3 = Color3.fromRGB(240, 240, 240) end
+            end
+
+            local function BuildItems(items)
+                for _, v in pairs(Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+                for i, itemStr in ipairs(items) do
+                    local B = Make("TextButton", {Parent = Scroll, Size = UDim2.new(1, 0, 0, 26), BackgroundTransparency = 1, Text = "   " .. tostring(itemStr), TextColor3 = Color3.fromRGB(150, 150, 160), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = i, AutoButtonColor = false})
+                    if table.find(SelectedItems, itemStr) then B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent end
+                    B.MouseEnter:Connect(function() B.BackgroundColor3 = Color3.fromRGB(45, 45, 55); B.BackgroundTransparency = 0.3 end)
+                    B.MouseLeave:Connect(function() B.BackgroundTransparency = 1 end)
+                    B.MouseButton1Click:Connect(function()
+                        local idx = table.find(SelectedItems, itemStr)
+                        if idx then table.remove(SelectedItems, idx); B.TextColor3 = Color3.fromRGB(150, 150, 160)
+                        else table.insert(SelectedItems, itemStr); B.TextColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent end
+                        UpdateDisplay(); Callback(SelectedItems)
+                    end)
+                end
+                Scroll.CanvasSize = UDim2.new(0, 0, 0, SL.AbsoluteContentSize.Y + 8)
+            end
+
+            BuildItems(Opts or {})
+
+            Head.MouseButton1Click:Connect(function()
+                IsOpen = not IsOpen
+                if IsOpen then
+                    Tween(Wrap, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, 148)}):Play()
+                    Tween(Arrow, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Rotation = 180}):Play()
+                else
+                    Tween(Wrap, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, -10, 0, 34)}):Play()
+                    Tween(Arrow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 0}):Play()
+                end
+            end)
+        end
+
+        function SectionAPI:AddRadio(LabelText, Callback, Opts)
+            SectionCounters = SectionCounters + 1
+            local Section = Make("Frame", {Parent = Content, LayoutOrder = SectionCounters, BackgroundColor3 = Color3.fromRGB(15, 15, 20), BackgroundTransparency = 0.3, Size = UDim2.new(1, -10, 0, 30)}, { Make("UICorner", {CornerRadius = UDim.new(0, 5)}) })
+            Make("TextLabel", {Parent = Section, Text = LabelText, Font = Enum.Font.GothamBold, TextSize = 9, TextColor3 = Color3.fromRGB(230, 230, 230), Size = UDim2.new(0, 150, 1, 0), Position = UDim2.new(0, 10, 0, 0), BackgroundTransparency = 1, TextXAlignment = Enum.TextXAlignment.Left})
+            local Options = Opts.Options or {"Opt1", "Opt2"}
+            local Default = Opts.Default or Options[1]
+            local RadioCont = Make("Frame", {Parent = Section, Size = UDim2.new(1, -110, 1, 0), Position = UDim2.new(0, 110, 0, 0), BackgroundTransparency = 1}, { Make("UIListLayout", {FillDirection = Enum.FillDirection.Horizontal, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 12)}) })
+            local Checks = {}
+            for i, optName in ipairs(Options) do
+                local RBtn = Make("TextButton", {Parent = RadioCont, Size = UDim2.new(0, 0, 1, 0), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1, Text = "", LayoutOrder = i, AutoButtonColor = false})
+                local Circle = Make("Frame", {Parent = RBtn, Size = UDim2.new(0, 14, 0, 14), Position = UDim2.new(0, 0, 0.5, -7), BackgroundColor3 = Color3.fromRGB(25, 25, 30)}, { Make("UICorner", {CornerRadius = UDim.new(1, 0)}), Make("UIStroke", {Color = Quantum.ThemePalettes[Window.CurrentTheme].Accent, Thickness = 1.5, Transparency = 0.5}) })
+                local Fill = Make("Frame", {Parent = Circle, Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = Quantum.ThemePalettes[Window.CurrentTheme].Accent, BorderSizePixel = 0}, {Make("UICorner", {CornerRadius = UDim.new(1, 0)})})
+                Checks[optName] = Fill
+                Make("TextLabel", {Parent = RBtn, Size = UDim2.new(0, 0, 1, 0), Position = UDim2.new(0, 18, 0, 0), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1, Text = optName, TextColor3 = Color3.fromRGB(200, 200, 200), Font = Enum.Font.Gotham, TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Center})
+                if optName == Default then Fill.Size = UDim2.new(0, 8, 0, 8) end
+                RBtn.MouseButton1Click:Connect(function()
+                    for key, f in pairs(Checks) do f.Size = (key == optName) and UDim2.new(0, 8, 0, 8) or UDim2.new(0, 0, 0, 0) end
+                    Callback(optName)
+                end)
+            end
+            return Section
+        end
+
+        return SectionAPI
+    end
+
         TabAPI.Container = Page
         return TabAPI
     end
